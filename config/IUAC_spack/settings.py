@@ -151,7 +151,7 @@ site_configuration = {
     ],
     'general': [
         {
-            'check_search_path': ['./application', './basics'],
+            'check_search_path': ['./application', './basics','./hpctestlib'],
             'check_search_recursive': True,
             'remote_detect': True,
             'purge_environment': True,
