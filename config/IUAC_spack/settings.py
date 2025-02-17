@@ -25,21 +25,6 @@ site_configuration = {
                     'environs': ['gnu','intel']
                 },
                 {
-                    'name': 'standard',
-                    'descr': 'standard nodes',
-                    'scheduler': 'slurm',
-                    'launcher': 'srun',
-                    'access': ['--partition=standard'],
-                    'environs': ['gnu', 'intel'],
-                    'max_jobs': 100,
-                    'resources': [
-                        {
-                            'name': 'memory',
-                            'options': ['--mem={size}', '--time=10:00:00']
-                        }
-                    ]
-                },
-                {
                     'name': 'cpu',
                     'descr': 'cpu nodes',
                     'scheduler': 'slurm',
