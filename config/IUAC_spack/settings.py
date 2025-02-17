@@ -157,5 +157,10 @@ site_configuration = {
             'purge_environment': True,
             'report_file': "./reports/run-report-{sessionid}.json"   
         }
+    ],
+    'storage': [
+        {
+            'enable': True
+        }
     ]    
 }
