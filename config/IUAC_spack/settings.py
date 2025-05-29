@@ -61,7 +61,7 @@ site_configuration = {
                      'scheduler': 'slurm',
                      'launcher': 'srun',
                      'access': ['--partition=gpu','--gres=gpu:2', '--time=10:00:00'],
-                     'environs': ['gnu', 'intel'],
+                     'environs': ['gnu'],
                      'max_jobs': 100,
                      'resources': [
                          {
