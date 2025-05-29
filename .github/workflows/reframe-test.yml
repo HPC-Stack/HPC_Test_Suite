@@ -1,0 +1,55 @@
+
+name: ReFrame with Spack
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+
+jobs:
+  reframe-setup:
+    runs-on: [self-hosted]
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v3
+
+    - name: Load Spack packages and run ReFrame
+      shell: bash
+      run: |
+        echo ">>> Source Spack"
+        source /home/apps/SPACK/spack/share/spack/setup-env.sh
+
+        echo ">>> Load required packages"
+        spack load reframe@4.7.3
+        
+        echo ">>> Enabling auto-completion for refarme" 
+        source /home/apps/SPACK/spack/opt/spack/linux-almalinux8-cascadelake/gcc-13.2.0/reframe-4.0.4-dwsezsgnraoadbyfzrdzygco5ghqeexv/share/completions/reframe.bash
+
+        echo ">>> Set ReFrame config path"
+        export RFM_CONFIG_PATH=/home/samirs/reframe/config/IUAC_spack
+        export RFM_OUTPUT_DIR=/home/samirs/reframe/output
+        export RFM_PERFLOG_DIR=/home/samirs/reframe/perflogs
+        export RFM_PREFIX=/home/samirs/reframe
+        
+        echo ">>> Diagnostics"
+        which spack
+        which reframe
+        echo "RFM_CONFIG_PATH=$RFM_CONFIG_PATH"
+        reframe --version
+
+        echo ">>> Run ReFrame tests"
+        reframe -c basics/hello/hello1.py -r
+  
+  reframe-opemp:
+    name: Post-process ReFrame Results
+    needs: reframe-setup   
+     runs-on: [self-hosted]
+      steps:
+        - name: Checkout code
+          uses: actions/checkout@v3
+
+        - name: Process ReFrame output
+          shell: bash
+          run: |
+            reframe -n 'osu_build_run.*benchmark_info=mpi.collective.osu_allreduce.*build_type=cuda' -S device_buffers=cuda -S num_tasks=16 -S valid_systems=paramrudra.iuac:gp -uS valid_prog_environs=gnu -l
