@@ -26,7 +26,8 @@ class numpy_ops_check(rfm.RunOnlyRegressionTest, pin_prefix=True):
     metric. The default assumption is that NumPy is already installed on the
     currest system.
     '''
-
+    valid_systems = ['*']
+    valid_prog_environs = ['*'] 
     executable = 'python'
     executable_opts = ['np_ops.py']
     descr = 'Test NumPy operations: dot, svd, cholesky, eigen and inv'

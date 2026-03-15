@@ -17,7 +17,7 @@ def parse_time_cmd(s):
 @rfm.simple_test
 class cp2ktest(rfm.RunOnlyRegressionTest):
     #np = parameter([x for x in range(10,101,10)])
-    valid_systems = ['paramrudra.iuac:cpu']
+    valid_systems = ['paramrudra.snbose:cpu']
     valid_prog_environs = ['gnu']
     num_process = parameter([48,96,192,384])
     num_tasks_per_node = 48

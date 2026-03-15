@@ -11,7 +11,7 @@ from module import parse_time_cmd
 class NamdTest(rfm.RunOnlyRegressionTest):
     descr = 'A simple test that runs Namd'
     np = parameter([48,96,192,384])
-    valid_systems = ['paramrudra.iuac:cpu']
+    valid_systems = ['paramrudra.snbose:cpu']
     valid_prog_environs = ['gnu']
     num_tasks_per_node = 48
     modules = ['namd/ynfxnux'] 

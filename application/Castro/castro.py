@@ -5,7 +5,7 @@ from reframe.core.backends import getlauncher
 @rfm.simple_test
 class castroTest(rfm.RunOnlyRegressionTest):
     descr = 'A test that runs amrex 2D Heat solver'
-    valid_systems = ['paramrudra.iuac:cpu']
+    valid_systems = ['paramrudra.snbose:cpu']
     valid_prog_environs = ['gnu']
     #num_process = parameter([48,96,192,384,768])
     num_threads = parameter([1, 2, 4, 8, 16, 30, 32, 40, 46]) #
@@ -56,7 +56,7 @@ class castroTest(rfm.RunOnlyRegressionTest):
 @rfm.simple_test
 class castro_mpi_Test(rfm.RunOnlyRegressionTest):
     descr = 'A test that runs amrex 2D Heat solver'
-    valid_systems = ['paramrudra.iuac:cpu']
+    valid_systems = ['paramrudra.snbose:cpu']
     valid_prog_environs = ['gnu']
     num_process = parameter([46]) #,96,192,384,768
     num_tasks_per_node = 48
@@ -99,7 +99,7 @@ class castro_mpi_Test(rfm.RunOnlyRegressionTest):
 @rfm.simple_test
 class castro_intelTest(rfm.RunOnlyRegressionTest):
     descr = 'A test that runs amrex 2D Heat solver'
-    valid_systems = ['paramrudra.iuac:cpu']
+    valid_systems = ['paramrudra.snbose:cpu']
     valid_prog_environs = ['gnu']
     #num_process = parameter([48,96,192,384,768])
     num_threads = parameter([1, 2, 4, 8, 16, 30, 32, 40, 46]) #
@@ -150,7 +150,7 @@ class castro_intelTest(rfm.RunOnlyRegressionTest):
 @rfm.simple_test
 class castro_intel_mpiTest(rfm.RunOnlyRegressionTest):
     descr = 'A test that runs amrex 2D Heat solver'
-    valid_systems = ['paramrudra.iuac:hm']
+    valid_systems = ['paramrudra.snbose:hm']
     valid_prog_environs = ['gnu']
     num_process = parameter([46]) #,96,192,384,768
     #num_threads = parameter([1, 2, 4, 8, 16, 30, 32, 40, 46]) #

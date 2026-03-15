@@ -1,7 +1,7 @@
 import reframe as rfm
 import reframe.utility.sanity as sn
 import sys
-sys.path.append('/home/samirs/reframe/application/module')
+sys.path.append('/home/cdacapp01/HPC_Test_Suite/application/module')
 from module import parse_time_cmd
 from reframe.core.backends import getlauncher
 
@@ -10,7 +10,7 @@ from reframe.core.backends import getlauncher
 @rfm.simple_test
 class gromacTest_cpu(rfm.RunOnlyRegressionTest):
     descr = 'A test that runs gromacs'
-    valid_systems = ['paramrudra.iuac:cpu']
+    valid_systems = ['paramrudra.snbose:cpu']
     valid_prog_environs = ['gnu']
     modules = ['gromacs/m6krxp7', 'openmpi/qmzsyj6']
     num_tasks_per_node = 48
@@ -49,7 +49,7 @@ class gromacTest_cpu(rfm.RunOnlyRegressionTest):
 @rfm.simple_test
 class gromacTest_gpu(rfm.RunOnlyRegressionTest):
     descr = 'A test that runs gromacs'
-    valid_systems = ['paramrudra.iuac:cpu']
+    valid_systems = ['paramrudra.snbose:cpu']
     valid_prog_environs = ['gnu']
     num_tasks_per_node = 40
     num_process = parameter([48,96,192])

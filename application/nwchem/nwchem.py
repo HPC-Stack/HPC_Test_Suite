@@ -17,7 +17,7 @@ def parse_time_cmd(s):
 @rfm.simple_test
 class nwchemTest(rfm.RunOnlyRegressionTest):
     descr = 'A test that runs nwchem'
-    valid_systems = ['paramrudra.iuac:gpu']
+    valid_systems = ['paramrudra.snbose:gpu']
     valid_prog_environs = ['gnu']
     #np = parameter((for i in [48,96,202,384]))
     num_process = parameter([48,96,192,384])

@@ -31,7 +31,8 @@ class ipcmagic_check(rfm.RunOnlyRegressionTest, pin_prefix=True):
     num_tasks = 2
     num_tasks_per_node = 1
     descr = 'Distributed training with TensorFlow using ipyparallel'
-
+    valid_systems = ['*']
+    valid_prog_environs = ['*']
     @performance_function('N/A')
     def fitted_line_slope(self):
         return sn.extractsingle(r'slope=(?P<slope>\S+)',

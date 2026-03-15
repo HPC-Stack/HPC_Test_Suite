@@ -11,7 +11,7 @@ from module import parse_time_cmd
 class lammpsTest(rfm.RunOnlyRegressionTest):
     descr = 'A simple test that runs lammps'
     np = parameter([48,96,192,384])
-    valid_systems = ['paramrudra.iuac:hm']
+    valid_systems = ['paramrudra.snbose:hm']
     valid_prog_environs = ['gnu']
     num_tasks_per_node = 48
     modules = ['lammps/feqr35c','intel-oneapi-mpi/3alw73q'] #intel-oneapi-mpi@2021.6.0 fftw +openmp/2tm3alt

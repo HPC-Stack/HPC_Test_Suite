@@ -18,7 +18,7 @@ def parse_time_cmd(s):
 @rfm.simple_test
 class openfoamTest(rfm.RunOnlyRegressionTest):
     descr = 'A test that runs openfoam'
-    valid_systems = ['paramrudra.iuac:cpu']
+    valid_systems = ['paramrudra.snbose:cpu']
     valid_prog_environs = ['gnu']
     num_tasks = 96
     num_tasks_per_node = 48
@@ -78,7 +78,7 @@ class openfoamTest(rfm.RunOnlyRegressionTest):
 class openfoamTestNew(rfm.RunOnlyRegressionTest):
     descr = 'A test that runs openfoam'
     np = parameter([48,96,192,384,768,1536,3072])
-    valid_systems = ['paramrudra.iuac:cpu']
+    valid_systems = ['paramrudra.snbose:cpu']
     valid_prog_environs = ['gnu']
     num_tasks_per_node = 48
     modules = ['openfoam/ggn7wsm','intel-oneapi-mpi/3alw73q']

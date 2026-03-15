@@ -20,7 +20,7 @@ def parse_time_cmd(s):
 @rfm.simple_test
 class wrfTest(rfm.RunOnlyRegressionTest):
     descr = 'A test that runs wrf'
-    valid_systems = ['paramrudra.iuac:hm']
+    valid_systems = ['paramrudra.snbose:hm']
     valid_prog_environs = ['gnu']
     modules = ['intel-oneapi-mpi/bzriwnc','intel-oneapi-compilers@2023.2.0']
     num_process = parameter([48,96,192,384])
