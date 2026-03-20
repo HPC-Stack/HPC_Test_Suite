@@ -3,3 +3,12 @@
 **/perflogs
 **/reports
 **/__pycache__
+# .gitignore
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+.reframe/
+*.log
+*.json.bak
+.env
