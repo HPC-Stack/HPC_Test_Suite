@@ -9,7 +9,7 @@ site_configuration = {
             'cc':  'mpicc',
             'cxx': 'mpicxx',
             'ftn': 'mpif90',
-            'modules': ['intel-oneapi-mpi/izwlzk5'],
+            'modules': ['openmpi/daxqcla'],
             'target_systems': ['paramrudra.snbose'],
         },
         {

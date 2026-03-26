@@ -69,7 +69,7 @@ site_configuration = {
                     'name': 'gpu',
                     'descr': 'GPU nodes — NVIDIA',
                     'extras': {'lfs_available': True},
-                    'modules': ['cuda@12.5.1/7zllz27'],
+                    'modules': ['cuda@12.5.1/klbpcme'],
                     'scheduler': 'slurm',
                     'launcher': 'srun',
                     'access': [
@@ -77,7 +77,7 @@ site_configuration = {
                         '--gres=gpu:2',
                         '--time=10:00:00',
                     ],
-                    'environs': ['gnu', 'spack-only'],
+                    'environs': ['gnu', 'foss','spack-only'],
                     'max_jobs': 100,
                     'features': ['gpu', 'cuda'],       # ← added for skip_unless_any_features
                     'processor': {
