@@ -46,6 +46,28 @@ class BenchmarkRunner:
         os.environ.setdefault("RFM_CHECK_SEARCH_RECURSIVE", "yes")
         os.environ.setdefault("RFM_GENERATE_FILE_REPORTS", "true")
 
+    def _default_system(self):
+        config_path = os.path.join(self.repo_dir, "config", "pseudo-cluster", "settings.py")
+        if os.path.isfile(config_path):
+            try:
+                ns = {}
+                with open(config_path) as f:
+                    exec(compile(f.read(), config_path, 'exec'), ns)
+                systems = ns.get("site_configuration", {}).get("systems", [])
+                if systems:
+                    name = systems[0].get("name")
+                    parts = systems[0].get("partitions", [])
+                    if name and parts:
+                        for p in parts:
+                            if p.get("scheduler", p.get("name")) != "local":
+                                return f"{name}:{p['name']}"
+                        return f"{name}:{parts[0]['name']}"
+                    if name:
+                        return f"{name}:cpu"
+            except Exception:
+                pass
+        return "paramrudra.snbose:cpu"
+
     def run_experiment(self, experiment, system=None, environ=None, dry_run=False):
         import yaml
 
@@ -72,11 +94,9 @@ class BenchmarkRunner:
         else:
             search_path = "."
 
-        tag = spec.get("tag", spec.get("tags", ["smoke"])[0] if isinstance(spec.get("tags"), list) else "smoke")
-        if isinstance(tag, list):
-            tag = tag[0]
+        tag = spec.get("tag")
 
-        sys_arg = system or spec.get("system", "*:cpu")
+        sys_arg = system or spec.get("system") or self._default_system()
         env_arg = environ or spec.get("environ", spec.get("environment", "gnu"))
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
         safe_name = os.path.splitext(os.path.basename(experiment))[0]
@@ -87,11 +107,12 @@ class BenchmarkRunner:
 
         cmd = [
             "reframe", "-c", search_path,
-            "-S", f"valid_systems={sys_arg}",
             "-S", f"valid_prog_environs={env_arg}",
             "--report-file", report_file,
             "-r",
         ]
+        if sys_arg:
+            cmd.extend(["--system", sys_arg])
         if tag:
             cmd.extend(["-t", tag])
         name_filter = spec.get("name_filter")
