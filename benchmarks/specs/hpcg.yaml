@@ -3,6 +3,7 @@ description: HPCG (High Performance Conjugate Gradient) benchmark
 tags: [microbenchmark, hpcg, cpu]
 systems: ['*']
 environ: gnu
+source: hpctestlib/microbenchmarks/HPCG/hpcg.py
 spack_spec: hpcg@3.1
 binary: xhpcg
 time_limit: 30m

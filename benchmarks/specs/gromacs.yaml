@@ -3,6 +3,7 @@ description: GROMACS molecular dynamics benchmark
 tags: [sciapp, gromacs, cpugpu]
 systems: ['*']
 environ: gnu
+source: hpctestlib/sciapps/gromacs/benchmarks.py
 spack_spec: gromacs@2024.2
 binary: gmx_mpi
 time_limit: 60m

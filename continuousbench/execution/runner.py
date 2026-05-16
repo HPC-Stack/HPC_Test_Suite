@@ -62,7 +62,16 @@ class BenchmarkRunner:
         with open(spec_path) as f:
             spec = yaml.safe_load(f)
 
-        search_path = spec.get("search_path", spec.get("path", "."))
+        source = spec.get("source", spec.get("search_path", spec.get("path")))
+        if source:
+            source_path = os.path.join(self.repo_dir, source)
+            if os.path.isfile(source_path):
+                search_path = os.path.dirname(source_path)
+            else:
+                search_path = source_path
+        else:
+            search_path = "."
+
         tag = spec.get("tag", spec.get("tags", ["smoke"])[0] if isinstance(spec.get("tags"), list) else "smoke")
         if isinstance(tag, list):
             tag = tag[0]
@@ -77,12 +86,17 @@ class BenchmarkRunner:
         os.makedirs(os.path.dirname(report_file), exist_ok=True)
 
         cmd = [
-            "reframe", "-c", search_path, "-t", tag,
+            "reframe", "-c", search_path,
             "-S", f"valid_systems={sys_arg}",
             "-S", f"valid_prog_environs={env_arg}",
             "--report-file", report_file,
             "-r",
         ]
+        if tag:
+            cmd.extend(["-t", tag])
+        name_filter = spec.get("name_filter")
+        if name_filter:
+            cmd.extend(["-n", name_filter])
 
         print(f"Running: {' '.join(cmd)}")
         if dry_run:
