@@ -30,16 +30,29 @@ class BenchmarkRunner:
         if shutil.which("reframe"):
             return True
         print("Error: reframe not found in PATH.", file=sys.stderr)
-        print("The HPC environment must be loaded first:", file=sys.stderr)
-        print("  cd", self.repo_dir, file=sys.stderr)
-        print("  source setup.sh", file=sys.stderr)
+        print("Install it with:  pip install reframe", file=sys.stderr)
+        print("Then verify:      reframe --version", file=sys.stderr)
         return False
+
+    def _set_rfm_env(self):
+        config_dir = os.path.join(self.repo_dir, "config")
+        config_files = os.pathsep.join([
+            os.path.join(config_dir, "common", "settings.py"),
+            os.path.join(config_dir, "environments", "settings.py"),
+            os.path.join(config_dir, "pseudo-cluster", "settings.py"),
+        ])
+        os.environ.setdefault("RFM_CONFIG_FILES", config_files)
+        os.environ.setdefault("RFM_CHECK_SEARCH_PATH", self.repo_dir)
+        os.environ.setdefault("RFM_CHECK_SEARCH_RECURSIVE", "yes")
+        os.environ.setdefault("RFM_GENERATE_FILE_REPORTS", "true")
 
     def run_experiment(self, experiment, system=None, environ=None, dry_run=False):
         import yaml
 
         if not self._require_reframe():
             return None
+
+        self._set_rfm_env()
 
         spec_path = self._resolve_spec_path(experiment)
         if not spec_path:

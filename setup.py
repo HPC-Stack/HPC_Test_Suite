@@ -13,9 +13,9 @@ setup(
         "typer>=0.4.0",
         "questionary>=1.10.0",
         "pyyaml>=5.1",
+        "reframe-hpc>=4.7.3",
     ],
     extras_require={
-        "reframe": ["reframe>=4.7.3"],
         "reporting": ["jinja2>=3.0", "matplotlib>=3.0", "plotly>=5.0"],
     },
     entry_points={
@@ -32,6 +32,8 @@ setup(
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Topic :: System :: Distributed Computing",
         "Topic :: Scientific/Engineering",
     ],

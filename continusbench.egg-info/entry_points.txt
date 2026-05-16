@@ -1,0 +1,3 @@
+[console_scripts]
+continusbench = continuousbench.cli.main:main
+

@@ -1,5 +1,6 @@
 #!/bin/bash
-# Convenience script: run benchmarks with env capture and report generation.
+# Convenience runner: run benchmarks with env capture and report generation.
+# ReFrame must be installed: pip install reframe
 #
 # Usage:
 #   ./scripts/run_benchmark.sh                      # run all smoke tests
@@ -13,8 +14,17 @@ SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
 REPO_DIR="$(dirname "$SCRIPT_DIR")"
 cd "$REPO_DIR"
 
-# Source environment
-source setup.sh 2>/dev/null || echo "Warning: setup.sh not found, relying on existing env"
+# Verify reframe is available
+if ! command -v reframe &>/dev/null; then
+    echo "Error: reframe not found. Install it with:  pip install reframe"
+    exit 1
+fi
+
+# Set ReFrame environment (if not already set)
+export RFM_CONFIG_FILES="${RFM_CONFIG_FILES:-${REPO_DIR}/config/common/settings.py:${REPO_DIR}/config/environments/settings.py:${REPO_DIR}/config/pseudo-cluster/settings.py}"
+export RFM_CHECK_SEARCH_PATH="${RFM_CHECK_SEARCH_PATH:-${REPO_DIR}}"
+export RFM_CHECK_SEARCH_RECURSIVE="${RFM_CHECK_SEARCH_RECURSIVE:-yes}"
+export RFM_GENERATE_FILE_REPORTS="${RFM_GENERATE_FILE_REPORTS:-true}"
 
 SEARCH_PATH="${1:-.}"
 PARTITION="${2:-cpu}"
@@ -29,7 +39,7 @@ REPORT_HTML="reports/benchmark_${TIMESTAMP}.html"
 
 mkdir -p reports
 
-echo "=== ContinuousBench Run ==="
+echo "=== Continus Bench Run ==="
 echo "  Search path: $SEARCH_PATH"
 echo "  System:      $SYSTEM"
 echo "  Environ:     $ENVIRON"

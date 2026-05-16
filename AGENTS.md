@@ -1,15 +1,19 @@
 # HPC_Test_Suite — Agent Guide
 
 ## Environment
+No `setup.sh` required. ReFrame is installed via pip:
 ```bash
-source setup.sh          # loads spack + reframe 4.7.3
+pip install reframe
 ```
-Sets `RFM_CONFIG_FILES` (3 colon-separated files: `common/`, `environments/`, `pseudo-cluster/`),
-`RFM_CHECK_SEARCH_PATH`, `RFM_GENERATE_FILE_REPORTS=true`.
+
+The `continusbench run` command auto-sets `RFM_CONFIG_FILES`, `RFM_CHECK_SEARCH_PATH`,
+`RFM_CHECK_SEARCH_RECURSIVE`, and `RFM_GENERATE_FILE_REPORTS`.
+
+For direct `reframe` usage, `source setup.sh` exports the same env vars.
 
 ## Installation
 ```bash
-pip install -r requirements.txt     # install Python deps
+pip install -r requirements.txt     # install Python deps + reframe
 pip install -e .                    # install continusbench CLI in dev mode
 continusbench --help                # verify the binary works
 ```
@@ -29,7 +33,7 @@ continusbench validate <spec.yaml>                                       # valid
 
 ## CI
 - Two self-hosted workflows: `reframe-test.yml` (push to main, PR) and `continuousbench-smoke.yml` (PR only).
-- Both `source setup.sh` and use `paramrudra.snbose:cpu` + `gnu`.
+- Both install reframe via `pip install -r requirements.txt`.
 
 ## Config
 - 3-file config: `config/{common,environments,pseudo-cluster}/settings.py` (order matters, via `RFM_CONFIG_FILES`).

@@ -1,6 +1,6 @@
-# ContinuousBench
+# Continus Bench
 
-CI-driven benchmarking framework for production HPC centers, built on ReFrame.
+CI-driven benchmarking framework for production HPC centers, built on ReFrame 4.7.3+.
 
 ## Architecture
 
@@ -11,14 +11,21 @@ scripts/                    # Standalone utilities
   run_benchmark.sh          Convenience runner for ad hoc campaigns
 
 continuousbench/
+  cli/                      Typer-based CLI (8 commands)
+  generators/               System/experiment/test YAML generators
   hooks/
     env_capture.py          add_env_capture(test) — ReFrame hook for env capture
-    spack_build.py          spack_ensure(spec) — auto-install missing software via Spack
+    spack_build.py          spack_ensure(spec) — auto-install software via Spack
   templates/
     _base.py                Base classes: SingleNodeThroughput, StrongScaling, etc.
+  execution/                Benchmark executor with scheduler integration
+  collectors/               Result collectors and regression detection
+  reporting/                Multi-format report engine (HTML, CSV, JSON, comparisons)
+  validators/               Benchmark spec validators
+  utils/                    Config management, YAML utilities
 
 benchmarks/
-  specs/                    Declarative YAML benchmark specifications (metadata)
+  specs/                    Declarative YAML benchmark specifications
 
 .github/workflows/
   continuousbench-smoke.yml CI workflow (PR gate: smoke tests → HTML report artifact)
@@ -27,19 +34,23 @@ benchmarks/
 ## Quick Start
 
 ```bash
-# 1. Load environment
-source setup.sh
+# 1. Install
+pip install -r requirements.txt
+pip install -e .
 
-# 2. Run smoke tests (basics) with env capture + report
-./scripts/run_benchmark.sh . cpu smoke
-
-# 3. List all tags
+# 2. List all tests
 reframe --list-tags -c .
 
-# 4. Filter by tag
-reframe -c . -t gpu -l
-reframe -c hpctestlib/ -t sciapp -l
+# 3. Run smoke tests
+continusbench run benchmarks/specs/hpcg.yaml
+
+# 4. Generate report
+reframe -c . -t smoke --report-file=report.json -r
+continusbench report report.json -o report.html
 ```
+
+ReFrame environment variables are auto-set by `continusbench run` and `./scripts/run_benchmark.sh`.
+No `setup.sh` required.
 
 ## Adding a New Benchmark
 
@@ -55,24 +66,24 @@ from spack_build import spack_ensure
 
 @rfm.simple_test
 class MyBench(rfm.RunOnlyRegressionTest):
-    valid_systems = ['*']      # portable across clusters
+    valid_systems = ['*']
     valid_prog_environs = ['gnu']
     tags = {'sciapp', 'myapp', 'cpu'}
-    
+
     @run_before('run')
     def setup_env_capture(self):
         add_env_capture(self)
-    
+
     @run_before('run')
     def ensure_spack(self):
         prefix = spack_ensure('myapp@1.0')
         if prefix:
             self.executable = os.path.join(prefix, 'bin', 'myapp')
-    
+
     @sanity_function
     def validate(self):
         return sn.assert_eq(self.job.exitcode, 0)
-    
+
     @performance_function('s')
     def extract_time(self):
         return sn.extractsingle(r'Time:\s+(\S+)', self.stdout, 1, float)
@@ -87,10 +98,9 @@ from continuousbench.templates._base import SingleNodeThroughput
 class MyBench(SingleNodeThroughput):
     tags = {'microbenchmark', 'custom'}
     executable = 'mybench'
-    # Everything else inherited from SingleNodeThroughput
 ```
 
-### Option C: YAML spec + ReFrame class
+### Option C: YAML spec + generated test
 
 Create `benchmarks/specs/myapp.yaml`:
 ```yaml
@@ -102,28 +112,30 @@ params:
   nodes: [1, 2, 4]
 ```
 
-Then create the corresponding `myapp.py` test file as in Option A.
+Generate the test:
+```bash
+continusbench generate-tests benchmarks/specs/myapp.yaml -o generated/
+reframe -c generated/ -l
+reframe -c generated/ -r
+```
 
 ## Tag System
-
-Tags enable benchmark subset selection. Use hierarchical naming:
 
 | Tag | Scope | Typical Cadence |
 |-----|-------|-----------------|
 | `smoke` | Sanity check (single node, < 1 min) | Every PR |
 | `cpu` | CPU compute benchmarks | Daily |
 | `gpu` | GPU compute benchmarks | Daily |
-| `microbenchmark` | Low-level subsystem tests | Daily (nightly) |
+| `microbenchmark` | Low-level subsystem tests | Daily |
 | `sciapp` | Full application kernels | Weekly |
 | `nightly` | Nightly regression suite | Daily |
 | `scaling` | Multi-node scaling tests | Weekly |
-| `build` | Compilation/install tests | PR + weekly |
 
 Run with: `reframe -c . -t <tag> -r`
 
 ## Spack Auto-Install
 
-Benchmarks automatically install missing software via Spack:
+Benchmarks can automatically install missing software via Spack:
 
 ```python
 from spack_build import spack_ensure
@@ -132,21 +144,18 @@ from spack_build import spack_ensure
 prefix = spack_ensure('gromacs@2024.2')
 if prefix:
     self.executable = os.path.join(prefix, 'bin', 'gmx_mpi')
-# if spack is unavailable or install fails → falls back to PATH/modules
 ```
 
-This ensures the framework works on **any** system with Spack installed. No manual module loading needed.
+This is **optional** — works only if Spack is available on the system.
 
 ## CI Workflow
-
-The provided workflow runs on every PR:
 
 ```yaml
 .github/workflows/continuousbench-smoke.yml
 ```
 
 Requires:
-- Self-hosted runner with SSH access to SLURM login node
+- Self-hosted runner with Python 3.8+
 - GitHub secrets: `CI_SSH_KEY`, `CI_SSH_HOST`, `CI_SSH_USER`
 
 Triggers:
@@ -154,22 +163,11 @@ Triggers:
 - **Cron nightly**: full nightly suite (`-t nightly`)
 - **Manual dispatch**: any tag subset
 
-## Adding a New System
-
-Deploying on a new cluster requires one file:
-
-```
-config/systems/<new_site>/settings.py
-```
-
-This maps abstract partition names → concrete SLURM partitions, module paths, and resource limits. Benchmarks use `['*']` wildcards and auto-adapt.
-
 ## Reporting
 
-After any run:
 ```bash
 reframe -c . --report-file=report.json -r
-python3 scripts/generate_report.py report.json report.html
+continusbench report report.json -o report.html
 ```
 
 The HTML report contains:
@@ -180,15 +178,11 @@ The HTML report contains:
 
 ## Cross-Compiler Analysis
 
-Run the same benchmark across multiple environments to compare:
-
 ```bash
 for env in gnu foss intel; do
     reframe -c application/gromacs -t gromacs \
         -S valid_systems=* -S valid_prog_environs=$env \
         --report-file=report_$env.json -r
 done
-python3 scripts/generate_report.py report_gnu.json comparison_gnu.html
+continusbench report report_gnu.json -o comparison_gnu.html
 ```
-
-The performance values per environment are captured in each report for side-by-side comparison.

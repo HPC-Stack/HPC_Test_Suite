@@ -1,11 +1,11 @@
-# ContinuousBench smoke test workflow
+# Continus Bench smoke test workflow
 # Runs on PRs targeting main to validate benchmark specification changes.
 #
 # Prerequisites:
-#   - Self-hosted runner on a node with SSH access to SLURM login node
+#   - Self-hosted runner with Python 3.8+
 #   - GH secrets: CI_SSH_KEY, CI_SSH_HOST, CI_SSH_USER
 
-name: ContinuousBench Smoke
+name: Continus Bench Smoke
 
 on:
   pull_request:
@@ -21,21 +21,34 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
 
-      - name: Setup Environment
+      - name: Install Dependencies
         run: |
-          source setup.sh
+          pip install -r requirements.txt
+          pip install -e .
+
+      - name: Set ReFrame Environment
+        run: |
+          export RFM_CONFIG_FILES="${PWD}/config/common/settings.py:${PWD}/config/environments/settings.py:${PWD}/config/pseudo-cluster/settings.py"
+          export RFM_CHECK_SEARCH_PATH="${PWD}"
+          export RFM_CHECK_SEARCH_RECURSIVE=yes
+          export RFM_GENERATE_FILE_REPORTS=true
           echo "RFM_CONFIG_FILES=$RFM_CONFIG_FILES"
           echo "RFM_CHECK_SEARCH_PATH=$RFM_CHECK_SEARCH_PATH"
           reframe --version
 
       - name: List Smoke Tests
         run: |
-          source setup.sh
+          export RFM_CONFIG_FILES="${PWD}/config/common/settings.py:${PWD}/config/environments/settings.py:${PWD}/config/pseudo-cluster/settings.py"
+          export RFM_CHECK_SEARCH_PATH="${PWD}"
+          export RFM_CHECK_SEARCH_RECURSIVE=yes
           reframe -c . -t smoke -l
 
       - name: Run Smoke Tests
         run: |
-          source setup.sh
+          export RFM_CONFIG_FILES="${PWD}/config/common/settings.py:${PWD}/config/environments/settings.py:${PWD}/config/pseudo-cluster/settings.py"
+          export RFM_CHECK_SEARCH_PATH="${PWD}"
+          export RFM_CHECK_SEARCH_RECURSIVE=yes
+          export RFM_GENERATE_FILE_REPORTS=true
           reframe -c . -t smoke \
             -S valid_systems=paramrudra.snbose:cpu \
             -S valid_prog_environs=gnu \
@@ -44,8 +57,6 @@ jobs:
 
       - name: Capture Environment
         run: |
-          source setup.sh
-          # Collect runner-side environment info
           bash scripts/env_snapshot.sh runner_env.json
 
       - name: Generate Report
