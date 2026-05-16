@@ -3,11 +3,16 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+import os
+import sys
 import time
 
 import reframe as rfm
 import reframe.utility.sanity as sn
 import reframe.utility.typecheck as typ
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'continuousbench', 'hooks'))
+from env_capture import add_env_capture
 
 
 @rfm.simple_test
@@ -38,6 +43,8 @@ class ssh_host_keys_check(rfm.RunOnlyRegressionTest):
     #: :default: ``'365d'``
     max_key_age = variable(str, value='365d', loggable=True)
 
+    valid_systems = ['*']
+    valid_prog_environs = ['*']
     executable = 'stat'
     executable_opts = ['-c', '%Y']
     tags = {'system', 'ssh'}
@@ -45,6 +52,10 @@ class ssh_host_keys_check(rfm.RunOnlyRegressionTest):
     @run_after('init')
     def set_hosts_keys(self):
         self.executable_opts += [self.ssh_host_keys]
+
+    @run_before('run')
+    def setup_env_capture(self):
+        add_env_capture(self)
 
     @sanity_function
     def assert_file_age(self):

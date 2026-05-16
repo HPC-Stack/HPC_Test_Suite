@@ -1,0 +1,60 @@
+# ContinuousBench smoke test workflow
+# Runs on PRs targeting main to validate benchmark specification changes.
+#
+# Prerequisites:
+#   - Self-hosted runner on a node with SSH access to SLURM login node
+#   - GH secrets: CI_SSH_KEY, CI_SSH_HOST, CI_SSH_USER
+
+name: ContinuousBench Smoke
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  smoke-test:
+    runs-on: [self-hosted]
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup Environment
+        run: |
+          source setup.sh
+          echo "RFM_CONFIG_FILES=$RFM_CONFIG_FILES"
+          echo "RFM_CHECK_SEARCH_PATH=$RFM_CHECK_SEARCH_PATH"
+          reframe --version
+
+      - name: List Smoke Tests
+        run: |
+          source setup.sh
+          reframe -c . -t smoke -l
+
+      - name: Run Smoke Tests
+        run: |
+          source setup.sh
+          reframe -c . -t smoke \
+            -S valid_systems=paramrudra.snbose:cpu \
+            -S valid_prog_environs=gnu \
+            --report-file=smoke_report.json \
+            -r
+
+      - name: Capture Environment
+        run: |
+          source setup.sh
+          # Collect runner-side environment info
+          bash scripts/env_snapshot.sh runner_env.json
+
+      - name: Generate Report
+        run: |
+          python3 scripts/generate_report.py smoke_report.json smoke_report.html
+
+      - name: Upload Report Artifact
+        uses: actions/upload-artifact@v3
+        with:
+          name: smoke-report
+          path: smoke_report.html
+          retention-days: 30

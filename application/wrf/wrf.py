@@ -4,61 +4,62 @@ from reframe.core.backends import getlauncher
 from reframe.core.runtime import runtime
 import sys
 import os
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'continuousbench', 'hooks'))
+from env_capture import add_env_capture
+from spack_build import spack_ensure
 
-def parse_time_cmd(s):	
-    """ Convert timing info from `time` into float seconds.	
-       E.g. parse_time('0m0.000s') -> 0.0	
-    """	
-    
-    s = s.strip()
-    mins, _, secs = s.partition('m')	
-    mins = float(mins)	
-    secs = float(secs.rstrip('s'))	
 
-    return mins * 60.0 + secs
+def parse_time_cmd(s):
+    mins, _, secs = s.strip().partition('m')
+    return float(mins) * 60.0 + float(secs.rstrip('s'))
+
 
 @rfm.simple_test
 class wrfTest(rfm.RunOnlyRegressionTest):
-    descr = 'A test that runs wrf'
-    valid_systems = ['paramrudra.snbose:hm']
+    descr = 'WRF CPU benchmark — CONUS 2.5km'
+    valid_systems = ['*']
     valid_prog_environs = ['gnu']
-    modules = ['intel-oneapi-mpi/bzriwnc','intel-oneapi-compilers@2023.2.0']
-    num_process = parameter([48,96,192,384])
-    #num_process = parameter([24])   #1056
-    sourcesdir = '/home/apps/hpc_inputs/applications/WRF/'                           #'src'
+    tags = {'sciapp', 'weather', 'wrf', 'cpu'}
+    num_process = parameter([48, 96, 192, 384])
+    sourcesdir = '/home/apps/hpc_inputs/applications/WRF/'
     exclusive_access = True
-    env_vars = {
-        'OMP_NUM_THREADS': '1',
-    }
+
+    env_vars = {'OMP_NUM_THREADS': '1'}
+
     prerun_cmds = [
-            '#wget https://www2.mmm.ucar.edu/wrf/users/benchmark/v422/v42_bench_conus2.5km.tar.gz',
-            'ulimit -s unlimited',
-            'tar -xvf wrf_run.tar ',
-            'ml load apps/wrf-4.5.1',
-            'cd run',
-            'time \\'# want to run mpi task under time
-        ]
+        'ulimit -s unlimited',
+        'tar -xvf wrf_run.tar',
+        'cd run',
+        'time \\',
+    ]
 
     executable = 'wrf.exe'
 
     reference = {
-        '*': {
-            'runtime_real': (0, None, None, 's'),
-        }
+        '*': {'runtime_real': (0, None, None, 's')},
     }
 
     @run_before('run')
     def set_num_task(self):
         self.num_tasks = self.num_process
-    
+
     @run_before('run')
     def replace_launcher(self):
         self.job.launcher = getlauncher('mpirun')()
 
+    @run_before('run')
+    def setup_env_capture(self):
+        add_env_capture(self)
+
+    @run_before('run')
+    def ensure_spack(self):
+        prefix = spack_ensure('wrf@4.5.1 build_type=dm+sm')
+        if prefix:
+            self.executable = os.path.join(prefix, 'run', 'wrf.exe')
+
     @sanity_function
     def validate_program(self):
         return sn.assert_eq(self.job.exitcode, 0)
-
 
     @performance_function('s', perf_key='runtime_real')
     def extract_runtime_real(self):

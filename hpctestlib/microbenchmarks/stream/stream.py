@@ -24,11 +24,15 @@
 
 import re
 import os
+import sys
 
 import reframe as rfm
 import reframe.utility.sanity as sn
 import reframe.utility.udeps as udeps
 import reframe.utility.typecheck as typ
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'continuousbench', 'hooks'))
+from env_capture import add_env_capture
 
 
 # ---------------------------------------------------------------------------
@@ -297,18 +301,18 @@ class StreamMultiSysTest(rfm.RegressionTest):
 
     # -------------------------------------------------------------------
     # Efficiency targets — reference = theoretical_per_socket x target.
-    # Derived from measured values on Gold 6240R with -10% margin:
-    #   Copy  measured ~70% → target 60%  (conservative)
-    #   Scale measured ~51% → target 41%
-    #   Add   measured ~59% → target 49%
-    #   Triad measured ~61% → target 51%
-    # Increase these once you have stable repeated measurements.
+    # Calibrated for paramrudra.snbose CPU partition (rbcn* nodes):
+    #   Copy  ~35% → target 30%
+    #   Scale ~26% → target 22%
+    #   Add   ~29% → target 24%
+    #   Triad ~29% → target 24%
+    # Increase once you have stable repeated measurements on your nodes.
     # -------------------------------------------------------------------
     efficiency_targets = variable(dict, value={
-        'Copy':  0.60,
-        'Scale': 0.41,
-        'Add':   0.49,
-        'Triad': 0.51,
+        'Copy':  0.30,
+        'Scale': 0.22,
+        'Add':   0.24,
+        'Triad': 0.24,
     })
 
     # Compiler flags per environment
@@ -341,6 +345,7 @@ class StreamMultiSysTest(rfm.RegressionTest):
 
     @run_before('run')
     def set_num_threads(self):
+        add_env_capture(self)
         num_threads = self.cores.get(self.current_partition.fullname, 4)
         self.num_cpus_per_task = num_threads
         self.env_vars = {

@@ -41,15 +41,15 @@ jobs:
         echo ">>> Run ReFrame tests"
         reframe -c basics/hello/hello1.py -r
   
-  reframe-opemp:
+  reframe-openmp:
     name: Post-process ReFrame Results
-    needs: reframe-setup   
-     runs-on: [self-hosted]
-      steps:
+    needs: reframe-setup
+    runs-on: [self-hosted]
+    steps:
         - name: Checkout code
           uses: actions/checkout@v3
 
         - name: Process ReFrame output
           shell: bash
           run: |
-            reframe -n 'osu_build_run.*benchmark_info=mpi.collective.osu_allreduce.*build_type=cuda' -S device_buffers=cuda -S num_tasks=16 -S valid_systems=paramrudra.iuac:gpu -S valid_prog_environs=gnu -l
+            reframe -n 'osu_build_run.*benchmark_info=mpi.collective.osu_allreduce.*build_type=cuda' -S device_buffers=cuda -S num_tasks=16 -S valid_systems=paramrudra.snbose:gpu -S valid_prog_environs=gnu -l

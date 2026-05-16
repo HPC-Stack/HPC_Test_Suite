@@ -12,7 +12,9 @@ import reframe.utility.sanity as sn
 class HelloThreadedExtended2Test(rfm.RegressionTest):
     valid_systems = ['*']
     valid_prog_environs = ['*']
+    sourcesdir = 'src'
     sourcepath = 'hello_threads.cpp'
+    tags = {'smoke', 'cpu', 'basics', 'omp'}
     build_system = 'SingleSource'
     executable_opts = ['16']
 

@@ -1,57 +1,59 @@
 import reframe as rfm
 import reframe.utility.sanity as sn
 from reframe.core.backends import getlauncher
-import sys
 import os
-def parse_time_cmd(s):	
-    """ Convert timing info from `time` into float seconds.	
-       E.g. parse_time('0m0.000s') -> 0.0	
-    """	
-    
-    s = s.strip()
-    mins, _, secs = s.partition('m')	
-    mins = float(mins)	
-    secs = float(secs.rstrip('s'))	
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'continuousbench', 'hooks'))
+from env_capture import add_env_capture
+from spack_build import spack_ensure
 
-    return mins * 60.0 + secs
+
+def parse_time_cmd(s):
+    mins, _, secs = s.strip().partition('m')
+    return float(mins) * 60.0 + float(secs.rstrip('s'))
+
+
 @rfm.simple_test
 class nwchemTest(rfm.RunOnlyRegressionTest):
-    descr = 'A test that runs nwchem'
-    valid_systems = ['paramrudra.snbose:gpu']
+    descr = 'NWChem CPU benchmark — input.nw'
+    valid_systems = ['*']
     valid_prog_environs = ['gnu']
-    #np = parameter((for i in [48,96,202,384]))
-    num_process = parameter([48,96,192,384])
+    tags = {'sciapp', 'chemistry', 'nwchem', 'cpu'}
+    num_process = parameter([48, 96, 192, 384])
     num_tasks_per_node = 48
     sourcesdir = 'src'
-    modules = ['nwchem','intel-oneapi-mpi/akaysq6']
     exclusive_access = True
-    
-    prerun_cmds = [
-            #'ml load openmpi/4.1.4',
-            'time \\'# want to run mpi task under time
-        ]
+
+    prerun_cmds = ['time \\']
 
     executable = 'nwchem'
     executable_opts = ["input.nw"]
 
     reference = {
-        '*': {
-            'runtime_real': (0, None, None, 's'),
-        }
+        '*': {'runtime_real': (0, None, None, 's')},
     }
 
     @run_before('run')
     def set_num_task(self):
         self.num_tasks = self.num_process
-    
+
     @run_before('run')
     def replace_launcher(self):
         self.job.launcher = getlauncher('mpirun')()
 
+    @run_before('run')
+    def setup_env_capture(self):
+        add_env_capture(self)
+
+    @run_before('run')
+    def ensure_spack(self):
+        prefix = spack_ensure('nwchem@7.2.2')
+        if prefix:
+            self.executable = os.path.join(prefix, 'bin', 'nwchem')
+
     @sanity_function
     def validate_program(self):
         return sn.assert_eq(self.job.exitcode, 0)
-
 
     @performance_function('s', perf_key='runtime_real')
     def extract_runtime_real(self):

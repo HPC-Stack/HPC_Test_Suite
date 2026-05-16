@@ -21,11 +21,15 @@ import os
 import re
 import shutil
 import subprocess
+import sys
 
 import reframe as rfm
 import reframe.utility.sanity as sn
 import reframe.utility.udeps as udeps
 import reframe.utility.typecheck as typ
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'continuousbench', 'hooks'))
+from env_capture import add_env_capture
 
 
 # ---------------------------------------------------------------------------
@@ -377,6 +381,7 @@ class BabelStreamCUDATest(rfm.RunOnlyRegressionTest):
 
     @run_before('run')
     def set_executable_and_gpu(self):
+        add_env_capture(self)
         # Get binary path from spack build fixture
         binary = self.babelstream_build.binary_path
 
@@ -526,6 +531,7 @@ class NVBandwidthTest(rfm.RunOnlyRegressionTest):
 
     @run_before('run')
     def set_gpu_options(self):
+        add_env_capture(self)
         self.num_tasks         = 1
         self.num_gpus_per_task = 1
         self.num_cpus_per_task = 2

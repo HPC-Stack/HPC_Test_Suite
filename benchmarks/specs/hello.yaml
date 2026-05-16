@@ -1,0 +1,14 @@
+# ContinuousBench specification: Hello World (smoke test)
+name: hello1
+description: Compiles and runs a simple C Hello World program
+executable: ./HelloTest
+tags: [smoke, cpu, basics]
+systems:
+  - paramrudra.snbose:cpu
+environ: gnu
+source: basics/hello/hello1.py
+parameters: {}
+resources:
+  num_tasks: 1
+  num_tasks_per_node: 1
+  time_limit: 5m

@@ -1,5 +1,6 @@
 """ReFrame benchmark for QuantumESPRESSO"""
 import os
+import sys
 from typing import TypeVar
 
 import reframe as rfm
@@ -9,6 +10,9 @@ from reframe.core.builtins import (performance_function, run_after, run_before,
 from reframe.core.exceptions import SanityError
 from reframe.core.parameters import TestParam as parameter
 from reframe.core.variables import TestVar as variable
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'continuousbench', 'hooks'))
+from env_capture import add_env_capture
 
 R = TypeVar('R')
 
@@ -65,7 +69,7 @@ class QEspressoPWCheck(rfm.RunOnlyRegressionTest):
     #: :type: :class:`int`
     #: :values: ``[50, 150]``
     ecut = parameter([50, 150], loggable=True)
-    valid_systems = ['kamrupa:cpu','kamrupa:hm']
+    valid_systems = ['paramrudra.snbose:cpu','paramrudra.snbose:hm']
     valid_prog_environs = ['gnu']
     modules = ['quantum-espresso/mbsyj44']
     exclusive_access = True
@@ -199,6 +203,10 @@ class QEspressoPWCheck(rfm.RunOnlyRegressionTest):
             for kind in ['cpu', 'wall']:
                 res = self.extract_report_time(name, kind)
                 self.perf_variables[f'{name}_{kind}'] = res
+
+    @run_before('run')
+    def setup_env_capture(self):
+        add_env_capture(self)
 
     @sanity_function
     def assert_job_finished(self):

@@ -3,8 +3,14 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+import os
+import sys
+
 import reframe as rfm
 import reframe.utility.sanity as sn
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'continuousbench', 'hooks'))
+from env_capture import add_env_capture
 
 
 @rfm.simple_test
@@ -61,6 +67,8 @@ class pytorch_cnn_check(rfm.RunOnlyRegressionTest, pin_prefix=True):
     #: :default: ``5``
     num_warmup_batches = variable(int, value=5)
 
+    valid_systems = ['*']
+    valid_prog_environs = ['*']
     executable = 'python pytorch_synthetic_benchmark.py'
     tags = {'ml', 'cnn', 'horovod'}
 
@@ -72,6 +80,7 @@ class pytorch_cnn_check(rfm.RunOnlyRegressionTest, pin_prefix=True):
 
     @run_before('run')
     def prepare_run(self):
+        add_env_capture(self)
         script = self.executable.split()[1]
         self.prerun_cmds = [
             f'curl -LJO https://raw.githubusercontent.com/horovod/horovod/{self.benchmark_version}/examples/pytorch/{script}',  # noqa: E501

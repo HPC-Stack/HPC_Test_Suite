@@ -4,10 +4,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import os
+import sys
 
 import reframe as rfm
 import reframe.utility.typecheck as typ
 import reframe.utility.sanity as sn
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'continuousbench', 'hooks'))
+from env_capture import add_env_capture
 
 
 class gpu_burn_build(rfm.CompileOnlyRegressionTest, pin_prefix=True):
@@ -52,9 +56,9 @@ class gpu_burn_build(rfm.CompileOnlyRegressionTest, pin_prefix=True):
 
         if self.gpu_build is None:
             # Try to set the build type from the partition features
-            if 'cuda' in curr_env.features:
+            if 'cuda' in curr_part.features:
                 self.gpu_build = 'cuda'
-            elif 'hip' in curr_env.features:
+            elif 'hip' in curr_part.features:
                 self.gpu_build = 'hip'
 
         gpu_devices = curr_part.select_devices('gpu')
@@ -153,6 +157,7 @@ class gpu_burn_check(rfm.RunOnlyRegressionTest):
     descr = 'GPU burn test'
     build_system = 'Make'
     executable = 'gpu_burn.x'
+    tags = {'microbenchmark', 'gpu', 'compute'}
 
     # The fixture to build the benchmark
     #
@@ -181,6 +186,7 @@ class gpu_burn_check(rfm.RunOnlyRegressionTest):
 
     @run_before('run')
     def set_num_gpus_per_node(self):
+        add_env_capture(self)
         if self.num_gpus_per_node is not None:
             return
 

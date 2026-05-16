@@ -81,6 +81,8 @@ class compute_pi_check(rfm.RunOnlyRegressionTest, pin_prefix=True):
     #: :default: `1`
     exec_cores = variable(int, value=1)
 
+    valid_systems = ['*']
+    valid_prog_environs = ['*']
     num_tasks = 3
     num_tasks_per_node = 1
     prerun_cmds = ['start-all.sh']

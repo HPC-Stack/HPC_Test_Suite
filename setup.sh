@@ -13,3 +13,15 @@ export RFM_CHECK_SEARCH_PATH=$(pwd)
 export RFM_CHECK_SEARCH_RECURSIVE=yes
 export RFM_GENERATE_FILE_REPORTS=true
 #/scratch/$USER/reframe/perflogs
+
+##################################################
+# #LLM SETUP
+# source /home/apps/spack/share/spack/setup-env.sh
+# spack load gcc@12/67zlogn
+# spack load nvhpc/tdc6iex
+# export CUDA_HOME=/home/apps/spack/opt/spack/linux-almalinux8-cascadelake/gcc-13.2.0/nvhpc-24.5-tdc6iexttubxc42znfv3hxpeoq2wiab7/Linux_x86_64/24.5/cuda/12.4/
+# source /home/apps/MLDL/DL-CondaPy3/bin/activate
+# #conda create -n vllm_py311 python=3.11 -y
+# conda activate vllm_py311
+# #pip install vllm==0.19.0
+# pip install transformers>=4.51.0

@@ -15,12 +15,16 @@
 
 import os
 import re
+import sys
 from string import Template
 
 import reframe as rfm
 import reframe.utility.sanity as sn
 import reframe.utility.typecheck as typ
 import reframe.utility.udeps as udeps
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'continuousbench', 'hooks'))
+from env_capture import add_env_capture
 
 
 # ---------------------------------------------------------------------------
@@ -78,6 +82,10 @@ class filesystem_options_check(rfm.RunOnlyRegressionTest):
     executable = 'cat'
     executable_opts = ['/proc/mounts']
     tags = {'system', 'fs', 'smoke', 'gate'}
+
+    @run_before('run')
+    def setup_env_capture(self):
+        add_env_capture(self)
 
     @run_before('sanity')
     def process_system_fs_opts(self):
@@ -221,12 +229,11 @@ class lustre_health_check(rfm.RunOnlyRegressionTest):
 
     @run_before('run')
     def write_health_script(self):
-        '''Write the health check script to a file in stagedir.
-
-        Writing to a file avoids ReFrame shell-escaping the newlines
-        in a multiline -c argument, which caused the script to only
-        run its first line on some SLURM configurations.
-        '''
+        add_env_capture(self)
+        # Write the health check script to a file in stagedir.
+        # Writing to a file avoids ReFrame shell-escaping the newlines
+        # in a multiline -c argument, which caused the script to only
+        # run its first line on some SLURM configurations.
         lfs_ok = self.current_partition.extras.get('lfs_available', False)
 
         lines = ['#!/bin/bash', 'set +e', '']
@@ -369,7 +376,8 @@ class filesystem_rw_check(rfm.RunOnlyRegressionTest):
 
     @run_before('run')
     def write_probe_script(self):
-        '''Write the probe script to a file — avoids quoting issues.'''
+        add_env_capture(self)
+        # Write the probe script to a file — avoids quoting issues.
         lines = ['#!/bin/bash', 'set +e', '']
 
         for path in self.probe_paths:
@@ -443,7 +451,8 @@ class scratch_io_bandwidth(rfm.RunOnlyRegressionTest):
 
     @run_before('run')
     def write_dd_script(self):
-        '''Write the dd benchmark script to a file — avoids quoting issues.'''
+        add_env_capture(self)
+        # Write the dd benchmark script to a file — avoids quoting issues.
         probe = '/scratch/$USER/.rfm_bw_${SLURM_JOB_ID:-$$}'
         lines = [
             '#!/bin/bash',

@@ -12,7 +12,9 @@ import reframe.utility.sanity as sn
 class HelloTest(rfm.RegressionTest):
     valid_systems = ['*:cpu']
     valid_prog_environs = ['gnu']
+    sourcesdir = 'src'
     sourcepath = 'hello.c'
+    tags = {'smoke', 'cpu', 'basics'}
     
     @sanity_function
     def assert_hello(self):

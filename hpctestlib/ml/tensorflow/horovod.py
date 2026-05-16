@@ -3,8 +3,14 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+import os
+import sys
+
 import reframe as rfm
 import reframe.utility.sanity as sn
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'continuousbench', 'hooks'))
+from env_capture import add_env_capture
 
 
 @rfm.simple_test
@@ -62,6 +68,8 @@ class tensorflow_cnn_check(rfm.RunOnlyRegressionTest, pin_prefix=True):
     #: :default: ``5``
     num_warmup_batches = variable(int, value=5)
 
+    valid_systems = ['*']
+    valid_prog_environs = ['*']
     executable = 'python tensorflow2_synthetic_benchmark.py'
     tags = {'ml', 'cnn', 'horovod'}
 
@@ -98,6 +106,10 @@ class tensorflow_cnn_check(rfm.RunOnlyRegressionTest, pin_prefix=True):
             rf'Total img/sec on {self.num_tasks} GPU\(s\): (\S+) \S+',
             self.stdout, 1, float
         )
+
+    @run_before('run')
+    def setup_env_capture(self):
+        add_env_capture(self)
 
     @sanity_function
     def validate_run(self):

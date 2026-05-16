@@ -10,7 +10,5 @@ def parse_time_cmd(s):
 
     return mins * 60.0 + secs
 
-def banchmark_para(Number):
-   number=1
-   final_list=[number<<i for i in range(Number)]
-   return final_list
+def benchmark_para(n):
+    return [1 << i for i in range(n)]

@@ -3,8 +3,14 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
+import os
+import sys
+
 import reframe as rfm
 import reframe.utility.sanity as sn
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'continuousbench', 'hooks'))
+from env_capture import add_env_capture
 
 
 @rfm.simple_test
@@ -21,7 +27,7 @@ class amber_nve_check(rfm.RunOnlyRegressionTest, pin_prefix=True):
     and extracts and reports a performance metric.
 
     '''
-    valid_systems = ['paramrudra.iuac:*']
+    valid_systems = ['paramrudra.snbose:*']
     valid_prog_environs = ['gnu']
     #: The output file to pass to the Amber executable.
     #:
@@ -137,6 +143,10 @@ class amber_nve_check(rfm.RunOnlyRegressionTest, pin_prefix=True):
         '''The performance of the benchmark expressed in ``ns/day``.'''
         return sn.extractsingle(r'ns/day =\s+(?P<perf>\S+)',
                                 self.output_file, 'perf', float, item=1)
+
+    @run_before('run')
+    def setup_env_capture(self):
+        add_env_capture(self)
 
     @sanity_function
     def assert_energy_readout(self):

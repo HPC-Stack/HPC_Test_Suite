@@ -25,7 +25,7 @@ site_configuration = {
             'cc':  'icc',
             'cxx': 'icpc',
             'ftn': 'ifort',
-            'modules': ['intel-oneapi-compilers/72dzcki'],
+            'modules': ['intel-oneapi-compilers/qnzqdd2'],
         },
         {
             'name': 'spack-only',

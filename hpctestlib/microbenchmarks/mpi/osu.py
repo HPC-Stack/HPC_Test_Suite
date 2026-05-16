@@ -4,9 +4,14 @@
 # SPDX-License-Identifier: BSD-3-Clause
 
 import os
+import sys
+
 import reframe as rfm
 import reframe.utility.sanity as sn
 from reframe.core.backends import getlauncher
+
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'continuousbench', 'hooks'))
+from env_capture import add_env_capture
 
 
 class fetch_osu_benchmarks(rfm.RunOnlyRegressionTest):
@@ -29,7 +34,6 @@ class fetch_osu_benchmarks(rfm.RunOnlyRegressionTest):
 
 class build_osu_benchmarks(rfm.CompileOnlyRegressionTest):
     '''Fixture for building the OSU benchmarks'''
-    local = True
     #: Build variant parameter.
     #:
     #: :type: :class:`str`
@@ -58,6 +62,8 @@ class build_osu_benchmarks(rfm.CompileOnlyRegressionTest):
             f'export LIBRARY_PATH=$CUDA_HOME/targets/x86_64-linux/lib/stubs:$LIBRARY_PATH',
             f'export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH'
         ]
+        self.build_system.cc = 'mpicc'
+        self.build_system.cxx = 'mpicxx'
         self.build_system.config_opts = [f'--enable-{self.build_type}']
         self.build_system.make_opts = ['-C', 'mpi']
         self.build_system.max_concurrency = 8
@@ -70,6 +76,9 @@ class build_osu_benchmarks(rfm.CompileOnlyRegressionTest):
 
 class osu_benchmark(rfm.RunOnlyRegressionTest):
     '''OSU benchmark test base class.'''
+
+    valid_systems = ['*']
+    valid_prog_environs = ['*']
 
     #: Number of warmup iterations.
     #:
@@ -136,7 +145,8 @@ class osu_benchmark(rfm.RunOnlyRegressionTest):
 
     @run_before('run')
     def replace_launcher(self):
-        self.job.launcher = getlauncher('mpirun')()
+        self.job.launcher = getlauncher('srun')()
+        self.job.launcher.options = ['--mpi=pmix']
 
     @run_before('setup')
     def setup_per_benchmark(self):
@@ -182,6 +192,10 @@ class osu_benchmark(rfm.RunOnlyRegressionTest):
 class osu_run(osu_benchmark):
     '''Run-only OSU benchmark test'''
 
+    @run_before('run')
+    def setup_env_capture(self):
+        add_env_capture(self)
+
 
 @rfm.simple_test
 class osu_build_run(osu_benchmark):
@@ -195,6 +209,7 @@ class osu_build_run(osu_benchmark):
 
     @run_before('run')
     def prepend_build_prefix(self):
+        add_env_capture(self)
         bench_path = self.benchmark_info[0].replace('.', '/')
         self.executable = os.path.join(self.osu_binaries.stagedir,
                                        self.osu_binaries.build_prefix,

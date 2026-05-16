@@ -1,65 +1,63 @@
 import reframe as rfm
 import reframe.utility.sanity as sn
 from reframe.core.backends import getlauncher
-#from reframe.core.launchers import LauncherWrapper
-def parse_time_cmd(s):	
-    """ Convert timing info from `time` into float seconds.	
-       E.g. parse_time('0m0.000s') -> 0.0	
-    """	
-    
-    s = s.strip()
-    mins, _, secs = s.partition('m')	
-    mins = float(mins)	
-    secs = float(secs.rstrip('s'))	
+import os
+import sys
+sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'continuousbench', 'hooks'))
+from env_capture import add_env_capture
+from spack_build import spack_ensure
 
-    return mins * 60.0 + secs
+
+def parse_time_cmd(s):
+    mins, _, secs = s.strip().partition('m')
+    return float(mins) * 60.0 + float(secs.rstrip('s'))
+
 
 @rfm.simple_test
 class cp2ktest(rfm.RunOnlyRegressionTest):
-    #np = parameter([x for x in range(10,101,10)])
-    valid_systems = ['paramrudra.snbose:cpu']
+    descr = 'CP2K CPU benchmark — H2O energy'
+    valid_systems = ['*']
     valid_prog_environs = ['gnu']
-    num_process = parameter([48,96,192,384])
+    tags = {'sciapp', 'chemistry', 'cp2k', 'cpu'}
+    num_process = parameter([48, 96, 192, 384])
     num_tasks_per_node = 48
-    #modules = ['cp2k'] #
+    exclusive_access = True
+
     executable = 'cp2k.popt'
-    executable_opts = ['-i H2O.inp']  #'-o H2O.out'
-    prerun_cmds = [
-            'source  /home/apps/SPACK/spack/share/spack/setup-env.sh',
-            'time \\',
-            'spack load cp2k'
-        ]
+    executable_opts = ['-i H2O.inp']
+
     reference = {
-        '*': {
-           'cp2k_time': (0, None, None, 's'),
-        }
+        '*': {'cp2k_time': (0, None, None, 's'), 'runtime_real': (0, None, None, 's')},
     }
+
+    prerun_cmds = ['time \\']
 
     @run_before('run')
     def set_num_task(self):
         self.num_tasks = self.num_process
-         
+
     @run_before('run')
     def replace_launcher(self):
         self.job.launcher = getlauncher('mpirun')()
-    
-    # @run_before('run')
-    # def set_cpu_oversubscribe(self):
-    #     self.job.launcher.options = ['--host /home/cdacapp/parikshit/reframe/hostfile']
-    # #    self.job.launcher = LauncherWrapper(self.job.launcher, 'time')
-    # #    self.num_tasks = self.np
-  
-   
+
+    @run_before('run')
+    def setup_env_capture(self):
+        add_env_capture(self)
+
+    @run_before('run')
+    def ensure_spack(self):
+        prefix = spack_ensure('cp2k@2024.1')
+        if prefix:
+            self.executable = os.path.join(prefix, 'bin', 'cp2k.popt')
+
     @sanity_function
     def assert_cp2k(self):
         return sn.assert_eq(self.job.exitcode, 0)
-    
+
     @performance_function('s', perf_key='cp2k_time')
     def extract_cp2k_time(self):
         return sn.extractsingle(r'^ CP2K\s+\d+\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+[\d.]+\s+([\d.]+)', self.stdout, 1, float)
-#  Regex patten                     CP2K 1  1.0    0.407    0.418  111.874  111.875
 
     @performance_function('s', perf_key='runtime_real')
     def extract_runtime_real(self):
-        return sn.extractsingle(r'^real\s+(\d+m[\d.]+s)$', self.stderr, 1, parse_time_cmd)                            
-    
+        return sn.extractsingle(r'^real\s+(\d+m[\d.]+s)$', self.stderr, 1, parse_time_cmd)

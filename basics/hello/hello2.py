@@ -14,6 +14,8 @@ class HelloMultiLangTest(rfm.RegressionTest):
 
     valid_systems = ['*']
     valid_prog_environs = ['*']
+    sourcesdir = 'src'
+    tags = {'smoke', 'cpu', 'basics', 'multilang'}
     # rfmdocstart: set_sourcepath
     @run_before('compile')
     def set_sourcepath(self):

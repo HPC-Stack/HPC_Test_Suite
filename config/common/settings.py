@@ -35,10 +35,10 @@ site_configuration = {
                     ),
                     'append': False,
                 },
-                # --- Graylog GELF handler (add your server address) ---
+                ##--- Graylog GELF handler (add your server address) ---
                 # {
                 #     'type': 'gelf',
-                #     'address': 'graylog.yourcluster.local',
+                #     'address': '0.0.0.0',
                 #     'port': 12201,
                 #     'level': 'info',
                 #     'extras': {
