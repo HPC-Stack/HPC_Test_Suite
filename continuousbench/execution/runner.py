@@ -25,8 +25,21 @@ class BenchmarkRunner:
                 return c
         return None
 
+    def _require_reframe(self):
+        import shutil
+        if shutil.which("reframe"):
+            return True
+        print("Error: reframe not found in PATH.", file=sys.stderr)
+        print("The HPC environment must be loaded first:", file=sys.stderr)
+        print("  cd", self.repo_dir, file=sys.stderr)
+        print("  source setup.sh", file=sys.stderr)
+        return False
+
     def run_experiment(self, experiment, system=None, environ=None, dry_run=False):
         import yaml
+
+        if not self._require_reframe():
+            return None
 
         spec_path = self._resolve_spec_path(experiment)
         if not spec_path:
@@ -44,8 +57,9 @@ class BenchmarkRunner:
         sys_arg = system or spec.get("system", "*:cpu")
         env_arg = environ or spec.get("environ", spec.get("environment", "gnu"))
         timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
+        safe_name = os.path.splitext(os.path.basename(experiment))[0]
         report_file = os.path.join(
-            self.repo_dir, "reports", f"{experiment}_{timestamp}.json"
+            self.repo_dir, "reports", f"{safe_name}_{timestamp}.json"
         )
         os.makedirs(os.path.dirname(report_file), exist_ok=True)
 
