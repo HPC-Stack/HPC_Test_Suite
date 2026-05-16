@@ -1,0 +1,32 @@
+name: paramrudra
+hostname: paramrudra.snbose
+description: C-DAC Param Rudra HPC system
+generated_at: "2026-05-16T12:00:00"
+
+partitions:
+  - name: login
+    type: login
+    scheduler: local
+  - name: cpu
+    type: cpu
+    scheduler: slurm
+  - name: hm
+    type: hm
+    scheduler: slurm
+  - name: gpu
+    type: gpu
+    scheduler: slurm
+
+environments:
+  gnu:
+    compilers:
+      cc: gcc
+      cxx: g++
+      ftn: gfortran
+    modules: []
+  foss:
+    compilers:
+      cc: mpicc
+      cxx: mpicxx
+      ftn: mpifort
+    modules: [foss]

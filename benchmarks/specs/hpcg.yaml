@@ -1,0 +1,25 @@
+name: hpcg
+description: HPCG (High Performance Conjugate Gradient) benchmark
+tags: [microbenchmark, hpcg, cpu]
+systems: ['*']
+environ: gnu
+spack_spec: hpcg@3.1
+binary: xhpcg
+time_limit: 30m
+perf_unit: gflops
+perf_regex: r'Final\s+Summary\s+:\s+(\S+)'
+
+benchmarks:
+  - name: hpcg_small
+    class_name: HPCGSmall
+    params:
+      problem_size: [104, 112, 128]
+    num_tasks: 4
+    tags: [microbenchmark, hpcg, cpu, smoke]
+
+  - name: hpcg_medium
+    class_name: HPCGMedium
+    params:
+      problem_size: [176, 192, 208]
+    num_tasks: 16
+    tags: [microbenchmark, hpcg, cpu, nightly]

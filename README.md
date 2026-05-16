@@ -1,6 +1,6 @@
 # HPC_Test_Suite
 
-A complete testing and benchmarking framework for HPC applications, built on **ReFrame 4.7.3** with **ContinuousBench** CI-driven benchmarking.
+A complete testing and benchmarking framework for HPC applications, built on **ReFrame 4.7.3** with **Continus Bench** CI-driven benchmarking.
 
 ## Quick Start
 
@@ -25,6 +25,11 @@ reframe -c application/wrf/ -n 'wrfTest.*num_process=48' -S valid_systems=paramr
 
 # Run with env capture + report
 ./scripts/run_benchmark.sh . cpu smoke
+
+# Continus Bench CLI
+python3 -m continuousbench.cli.main --help
+python3 -m continuousbench.cli.main list-systems
+python3 -m continuousbench.cli.main add-system
 ```
 
 ## Structure
@@ -33,14 +38,21 @@ reframe -c application/wrf/ -n 'wrfTest.*num_process=48' -S valid_systems=paramr
 application/        # 9 HPC application benchmarks (GROMACS, LAMMPS, NAMD, WRF, OpenFOAM, etc.)
 basics/             # 6 "hello world" sanity tests (C, C++, OpenMP, MPI)
 hpctestlib/         # 17 system/hardware tests (HPL, STREAM, OSU, GPU burn, Horovod, etc.)
-config/             # 3-file ReFrame configuration split
-continuousbench/    # CI-driven framework layer (hooks, templates, scripts)
+config/             # Multi-file ReFrame configuration (common, environments, pseudo-cluster, systems)
+continuousbench/    # Core framework (CLI, generators, hooks, templates, execution, collectors, reporting, validators)
+  ├── cli/          # Typer CLI: add-system, add-experiment, run, report, compare, validate, generate-tests
+  ├── generators/   # System/experiment/test YAML generators
+  ├── execution/    # Benchmark executor
+  ├── collectors/   # Result collection and regression detection
+  ├── reporting/    # Multi-format report engine (HTML, CSV, JSON, comparisons)
+  └── validators/   # Benchmark spec validation
 scripts/            # Utilities (env snapshot, report generation, run/compare helpers)
+benchmarks/specs/   # YAML benchmark definitions (HPCG, GROMACS specs)
 ```
 
-## ContinuousBench
+## Continus Bench
 
-Full documentation: [`continuousbench/README.md`](continuousbench/README.md)
+Full documentation: [`AGENTS.md`](AGENTS.md)
 
 Key features:
 - **Environment provenance**: Every benchmark run captures kernel, modules, GPU, SLURM vars → JSON sidecar
@@ -48,13 +60,16 @@ Key features:
 - **Spack auto-install**: Missing software auto-installed via Spack (`spack_ensure()`)
 - **Tag-based filtering**: 40 tags for benchmark subset selection (smoke, nightly, gpu, sciapp, etc.)
 - **Cross-compiler comparison**: Compare gnu vs foss vs intel performance
+- **CLI-driven onboarding**: Interactive system and experiment creation
+- **Performance regression detection**: Compare runs and detect regressions
+- **Multi-format reporting**: HTML, CSV, JSON summary, run comparisons
 
 ## Adding a New Benchmark
 
 See [`continuousbench/README.md`](continuousbench/README.md#adding-a-new-benchmark) for three approaches:
 1. Standard ReFrame test with env capture hook
 2. Template base class
-3. YAML spec + ReFrame class
+3. YAML spec + ReFrame class generation (`continus-bench generate-tests`)
 
 ## System Portability
 
