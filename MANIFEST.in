@@ -1,0 +1,6 @@
+include README.md
+include AGENTS.md
+include requirements.txt
+recursive-include config/systems *.yaml
+recursive-include benchmarks/specs *.yaml
+recursive-include scripts *.sh *.py

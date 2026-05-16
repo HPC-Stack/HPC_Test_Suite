@@ -1,9 +1,3 @@
-import sys
-import os
-from pathlib import Path
-
-sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', '..'))
-
 import typer
 import questionary
 from typing import Optional
@@ -147,5 +141,9 @@ def list_systems():
         typer.echo(f"{name}: [{partitions}]")
 
 
-if __name__ == "__main__":
+def main():
     app()
+
+
+if __name__ == "__main__":
+    main()
