@@ -36,12 +36,17 @@ class BenchmarkRunner:
         return False
 
     def _set_rfm_env(self):
+        import glob
         config_dir = os.path.join(self.repo_dir, "config")
+        # All .py config fragments from pseudo-cluster/ and systems/
+        pseudo_files = sorted(glob.glob(
+            os.path.join(config_dir, "pseudo-cluster", "*.py")))
+        system_files = sorted(glob.glob(
+            os.path.join(config_dir, "systems", "*.py")))
         config_files = os.pathsep.join([
             os.path.join(config_dir, "common", "settings.py"),
             os.path.join(config_dir, "environments", "settings.py"),
-            os.path.join(config_dir, "pseudo-cluster", "settings.py"),
-        ])
+        ] + pseudo_files + system_files)
         os.environ.setdefault("RFM_CONFIG_FILES", config_files)
         os.environ.setdefault("RFM_CHECK_SEARCH_PATH", self.repo_dir)
         os.environ.setdefault("RFM_CHECK_SEARCH_RECURSIVE", "yes")
