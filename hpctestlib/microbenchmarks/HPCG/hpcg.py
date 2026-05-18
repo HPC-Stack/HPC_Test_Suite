@@ -46,14 +46,15 @@ class HPCGRunTest(rfm.RunOnlyRegressionTest):
                 if 'intel-oneapi-mpi' in path:
                     mpi_bin = os.path.join(os.path.dirname(path), 'bin')
                     break
-            self.env_vars = {
+            env_vars = {
                 'LD_LIBRARY_PATH': ':'.join(ld_paths) + ':$LD_LIBRARY_PATH',
                 'I_MPI_PMI_LIBRARY': '/usr/lib64/libpmi2.so',
                 'I_MPI_FABRICS': 'shm:ofi',
                 'FI_PROVIDER': 'tcp'
             }
             if mpi_bin:
-                self.env_vars['PATH'] = f'{mpi_bin}:$PATH'
+                env_vars['PATH'] = f'{mpi_bin}:$PATH'
+            self.env_vars = env_vars
 
         hpcg_dat_content = f"""HPCG benchmark input file
 Sandia National Laboratories; University of Tennessee, Knoxville
@@ -71,11 +72,15 @@ Sandia National Laboratories; University of Tennessee, Knoxville
             self.num_tasks_per_node = 4
             self.num_tasks = self.num_nodes * self.num_tasks_per_node
         self.time_limit = '15m'
+        mpi_env = {'I_MPI_HYDRA_BOOTSTRAP': 'slurm'}
+        if hasattr(self, 'env_vars') and self.env_vars:
+            self.env_vars.update(mpi_env)
+        else:
+            self.env_vars = mpi_env
 
     @run_before('run')
     def replace_launcher(self):
-        self.job.launcher = getlauncher('srun')()
-        self.job.launcher.options = ['--mpi=pmix']
+        self.job.launcher = getlauncher('mpirun')()
 
     @sanity_function
     def validate_run(self):

@@ -1,6 +1,7 @@
 import os
 import subprocess
 import sys
+import tempfile
 from datetime import datetime
 
 
@@ -84,15 +85,23 @@ class BenchmarkRunner:
         with open(spec_path) as f:
             spec = yaml.safe_load(f)
 
-        source = spec.get("source", spec.get("search_path", spec.get("path")))
-        if source:
-            source_path = os.path.join(self.repo_dir, source)
-            if os.path.isfile(source_path):
-                search_path = os.path.dirname(source_path)
-            else:
-                search_path = source_path
+        benchmarks = spec.get("benchmarks")
+        if benchmarks:
+            from continuousbench.generators.test_generator import TestGenerator
+            temp_dir = tempfile.mkdtemp(prefix="cb_run_")
+            gen = TestGenerator()
+            gen.generate_from_spec(spec_path, temp_dir)
+            search_path = temp_dir
         else:
-            search_path = "."
+            source = spec.get("source", spec.get("search_path", spec.get("path")))
+            if source:
+                source_path = os.path.join(self.repo_dir, source)
+                if os.path.isfile(source_path):
+                    search_path = source_path
+                else:
+                    search_path = source_path
+            else:
+                search_path = "."
 
         tag = spec.get("tag")
 
@@ -124,8 +133,12 @@ class BenchmarkRunner:
             print("[DRY RUN] Would execute above command")
             return report_file
 
+        env = os.environ.copy()
+        hooks_dir = os.path.join(self.repo_dir, 'continuousbench', 'hooks')
+        env['PYTHONPATH'] = f"{hooks_dir}:{env.get('PYTHONPATH', '')}"
+
         try:
-            result = subprocess.run(cmd, capture_output=True, text=True, timeout=3600)
+            result = subprocess.run(cmd, capture_output=True, text=True, timeout=3600, env=env)
             print(result.stdout[-2000:] if len(result.stdout) > 2000 else result.stdout)
             if result.stderr:
                 print(result.stderr[-1000:] if len(result.stderr) > 1000 else result.stderr, file=sys.stderr)

@@ -33,6 +33,19 @@ def spack_ensure(spec):
     except (subprocess.TimeoutExpired, FileNotFoundError):
         pass
 
+    # location may fail on ambiguous spec — try find with prefix format
+    try:
+        result = subprocess.run(
+            ['spack', 'find', '--format', '{prefix}', spec],
+            capture_output=True, text=True, timeout=30
+        )
+        if result.returncode == 0 and result.stdout.strip():
+            prefix = result.stdout.strip().split('\n')[0]
+            _installed_cache[spec] = prefix
+            return prefix
+    except (subprocess.TimeoutExpired, FileNotFoundError):
+        pass
+
     # Not installed — try to install
     try:
         print(f'[spack_ensure] Installing {spec} ...', file=sys.stderr)
