@@ -121,7 +121,7 @@ class SystemGenerator:
             partitions=partitions_text,
         )
 
-        reframe_path = os.path.join(self.config_dir, f"{name}.py")
+        reframe_path = os.path.join(self.config_dir, f"{sysname}.py")
         with open(reframe_path, "w") as f:
             f.write(config_text)
 
