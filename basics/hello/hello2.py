@@ -13,7 +13,7 @@ class HelloMultiLangTest(rfm.RegressionTest):
     lang = parameter(['c', 'cpp'])
 
     valid_systems = ['*']
-    valid_prog_environs = ['*']
+    valid_prog_environs = ['gnu','intel']
     sourcesdir = 'src'
     tags = {'smoke', 'cpu', 'basics', 'multilang'}
     # rfmdocstart: set_sourcepath

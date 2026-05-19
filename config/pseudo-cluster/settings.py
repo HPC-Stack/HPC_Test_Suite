@@ -21,16 +21,16 @@ site_configuration = {
                     'descr': 'Login node — local execution',
                     'scheduler': 'local',
                     'launcher': 'local',
-                    'environs': ['gnu', 'intel', 'foss', 'spack-only', 'builtin'],
+                    'environs': ['gnu', 'intel', 'foss',],
                 },
                 {
                     'name': 'cpu',
                     'descr': 'CPU compute nodes',
                     'extras': {'lfs_available': False},
                     'scheduler': 'slurm',
-                    'launcher': 'mpirun',
+                    'launcher': 'srun',
                     'access': ['--partition=cpu'],
-                    'environs': ['gnu', 'intel', 'foss', 'spack-only'],
+                    'environs': ['gnu', 'intel', 'foss'],
                     'max_jobs': 100,
                     'processor': {
                         'num_cpus': 48,
@@ -49,9 +49,9 @@ site_configuration = {
                     'descr': 'High-memory nodes',
                     'extras': {'lfs_available': False},
                     'scheduler': 'slurm',
-                    'launcher': 'mpirun',
+                    'launcher': 'srun',
                     'access': ['--partition=hm'],
-                    'environs': ['gnu', 'intel', 'spack-only'],
+                    'environs': ['gnu', 'intel'],
                     'max_jobs': 100,
                     'processor': {
                         'num_cpus': 48,
@@ -71,13 +71,13 @@ site_configuration = {
                     'extras': {'lfs_available': True},
                     'modules': ['cuda@12.5.1/klbpcme'],
                     'scheduler': 'slurm',
-                    'launcher': 'mpirun',
+                    'launcher': 'srun',
                     'access': [
                         '--partition=gpu',
                         '--gres=gpu:2',
                         '--time=10:00:00',
                     ],
-                    'environs': ['gnu', 'foss','spack-only'],
+                    'environs': ['gnu', 'foss'],
                     'max_jobs': 100,
                     'features': ['gpu', 'cuda'],       # ← added for skip_unless_any_features
                     'processor': {

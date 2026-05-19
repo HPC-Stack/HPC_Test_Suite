@@ -17,7 +17,6 @@ site_configuration = {
             'cc':  'gcc',
             'cxx': 'g++',
             'ftn': 'gfortran',
-            'modules': ['openmpi@4.1.6/daxqcla'],
             # No target_systems = available on all systems
         },
         {
@@ -26,14 +25,6 @@ site_configuration = {
             'cxx': 'icpc',
             'ftn': 'ifort',
             'modules': ['intel-oneapi-compilers/qnzqdd2'],
-        },
-        {
-            'name': 'spack-only',
-            'cc':  'gcc',
-            'cxx': 'g++',
-            'ftn': 'gfortran',
-            'modules': [],
-            # Used when Spack environment is activated externally
         },
     ],
 }
