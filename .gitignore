@@ -13,3 +13,4 @@ __pycache__/
 *.json.bak
 .env
 *.egg-info
+AGENTS.md

@@ -26,5 +26,12 @@ site_configuration = {
             'ftn': 'ifort',
             'modules': ['intel-oneapi-compilers/qnzqdd2'],
         },
+        {
+            'name': 'nvhpc',
+            'cc': 'nvc',
+            'cxx': 'nvcc',
+            'ftn': 'nvfortran',
+            'modules': ['nvhpc/tdc6iex']
+        }
     ],
 }

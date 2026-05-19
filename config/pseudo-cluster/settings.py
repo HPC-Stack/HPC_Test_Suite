@@ -28,9 +28,9 @@ site_configuration = {
                     'descr': 'CPU compute nodes',
                     'extras': {'lfs_available': False},
                     'scheduler': 'slurm',
-                    'launcher': 'srun',
+                    'launcher': 'local',
                     'access': ['--partition=cpu'],
-                    'environs': ['gnu', 'intel', 'foss'],
+                    'environs': ['gnu', 'foss', 'intel'],
                     'max_jobs': 100,
                     'processor': {
                         'num_cpus': 48,
@@ -49,7 +49,7 @@ site_configuration = {
                     'descr': 'High-memory nodes',
                     'extras': {'lfs_available': False},
                     'scheduler': 'slurm',
-                    'launcher': 'srun',
+                    'launcher': 'local',
                     'access': ['--partition=hm'],
                     'environs': ['gnu', 'intel'],
                     'max_jobs': 100,
@@ -71,13 +71,13 @@ site_configuration = {
                     'extras': {'lfs_available': True},
                     'modules': ['cuda@12.5.1/klbpcme'],
                     'scheduler': 'slurm',
-                    'launcher': 'srun',
+                    'launcher': 'local',
                     'access': [
                         '--partition=gpu',
                         '--gres=gpu:2',
                         '--time=10:00:00',
                     ],
-                    'environs': ['gnu', 'foss'],
+                    'environs': ['gnu', 'foss', 'nvhpc'],
                     'max_jobs': 100,
                     'features': ['gpu', 'cuda'],       # ← added for skip_unless_any_features
                     'processor': {

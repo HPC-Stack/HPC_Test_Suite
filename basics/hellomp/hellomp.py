@@ -3,15 +3,15 @@
 #
 # SPDX-License-Identifier: BSD-3-Clause
 
-# rfmdocstart: hellothreadedextended
+# rfmdocstart: hellothreadedextented2
 import reframe as rfm
 import reframe.utility.sanity as sn
 
 
 @rfm.simple_test
-class HelloThreadedExtendedTest(rfm.RegressionTest):
+class HelloThreadedExtended2Test(rfm.RegressionTest):
     valid_systems = ['*']
-    valid_prog_environs = ['*']
+    valid_prog_environs = ['gnu','intel','nvhpc']
     sourcesdir = 'src'
     sourcepath = 'hello_threads.cpp'
     tags = {'smoke', 'cpu', 'basics', 'omp'}
@@ -20,9 +20,10 @@ class HelloThreadedExtendedTest(rfm.RegressionTest):
 
     @run_before('compile')
     def set_compilation_flags(self):
-        self.build_system.cxxflags = ['-std=c++11', '-Wall']
+        self.build_system.cppflags = ['-DSYNC_MESSAGES']
         environ = self.current_environ.name
         if environ in {'intel', 'gnu'}:
+            self.build_system.cxxflags = ['-std=c++11', '-Wall']
             self.build_system.cxxflags += ['-pthread']
 
     @sanity_function
@@ -30,4 +31,4 @@ class HelloThreadedExtendedTest(rfm.RegressionTest):
         num_messages = sn.len(sn.findall(r'\[\s?\d+\] Hello, World\!',
                                          self.stdout))
         return sn.assert_eq(num_messages, 16)
-# rfmdocend: hellothreadedextended
+# rfmdocend: hellothreadedextented2
