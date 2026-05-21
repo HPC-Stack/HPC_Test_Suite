@@ -17,13 +17,13 @@ def parse_time_cmd(s):
 @rfm.simple_test
 class wrfTest(rfm.RunOnlyRegressionTest):
     descr = 'WRF CPU benchmark — CONUS 2.5km'
-    valid_systems = ['*']
-    valid_prog_environs = ['gnu']
+    valid_systems = ['*:cpu']
+    valid_prog_environs = ['foss']
     tags = {'sciapp', 'weather', 'wrf', 'cpu'}
     num_process = parameter([48, 96, 192, 384])
     sourcesdir = '/home/apps/hpc_inputs/applications/WRF/'
     exclusive_access = True
-
+    modules = ['openmpi/kmaehjs','wrf/c3ap2ci']
     env_vars = {'OMP_NUM_THREADS': '1'}
 
     prerun_cmds = [

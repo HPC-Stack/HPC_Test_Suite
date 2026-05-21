@@ -14,3 +14,4 @@ __pycache__/
 .env
 *.egg-info
 AGENTS.md
+HPC_Test_Suite.code-workspace

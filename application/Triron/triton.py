@@ -22,7 +22,8 @@ class fetch_triton(rfm.RunOnlyRegressionTest):
 class build_triton(rfm.CompileOnlyRegressionTest):
     '''Build Triton mini-app (OMP or CUDA variant).'''
     build_type = parameter(['hpc_omp', 'hpc_gpu'])
-    valid_systems = ['*']
+    valid_systems = ['*:login']
+    local = True
     valid_prog_environs = ['gnu']
     tags = {'sciapp', 'triton', 'cpu', 'gpu'}
     build_system = 'Make'
