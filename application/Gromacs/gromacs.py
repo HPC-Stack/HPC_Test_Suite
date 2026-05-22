@@ -8,15 +8,15 @@ from reframe.core.backends import getlauncher
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'continuousbench', 'hooks'))
 from env_capture import add_env_capture
 from spack_build import spack_ensure
-
+import reframe.utility.udeps as udeps
 
 @rfm.simple_test
 class GromacsBuildTest(rfm.RegressionTest):
     descr = 'Build Gromacs using Spack'
-    valid_systems = ['*']
-    valid_prog_environs = ['gnu']
+    local = True
     tags = {'build', 'sciapp', 'chemistry', 'gromacs'}
-
+    valid_systems = ['*:login']
+    valid_prog_environs = ['gnu']
     build_system = 'Spack'
 
     @run_before('compile')
@@ -39,9 +39,9 @@ class gromacTest_cpu(rfm.RunOnlyRegressionTest):
     tags = {'sciapp', 'chemistry', 'gromacs', 'cpu'}
     num_tasks_per_node = 48
     num_process = parameter([48, 96, 192, 384])
-    sourcesdir = 'src'
+    sourcesdir = '/home/apps/hpc_inputs/applications/GROMACS/'
     exclusive_access = True
-
+    modules = ['gromacs/fcqi4pl']
     prerun_cmds = [
         'tar -xvf water_GMX50_bare.tar.gz',
         'cd water-cut1.0_GMX50_bare/3072',
@@ -51,6 +51,11 @@ class gromacTest_cpu(rfm.RunOnlyRegressionTest):
 
     executable = 'gmx_mpi'
     executable_opts = ["mdrun -nsteps 5000 -s water_pme.tpr"]
+
+    @run_after('init')
+    def add_dependencies(self):
+        self.depends_on('GromacsBuildTest', udeps.fully)
+
 
     @run_before('run')
     def set_num_task(self):
@@ -64,11 +69,6 @@ class gromacTest_cpu(rfm.RunOnlyRegressionTest):
     def setup_env_capture(self):
         add_env_capture(self)
 
-    @run_before('run')
-    def ensure_spack(self):
-        prefix = spack_ensure('gromacs@2024.2')
-        if prefix:
-            self.executable = os.path.join(prefix, 'bin', 'gmx_mpi')
 
     @sanity_function
     def validate_program(self):
@@ -87,9 +87,9 @@ class gromacTest_gpu(rfm.RunOnlyRegressionTest):
     tags = {'sciapp', 'chemistry', 'gromacs', 'gpu'}
     num_tasks_per_node = 40
     num_process = parameter([48, 96, 192])
-    sourcesdir = 'src'
+    sourcesdir = '/home/apps/hpc_inputs/applications/GROMACS/'
     exclusive_access = True
-
+    modules = ['gromacs/ape6gvm']
     prerun_cmds = [
         'tar -xvf water_GMX50_bare.tar.gz',
         'cd water-cut1.0_GMX50_bare/3072',
