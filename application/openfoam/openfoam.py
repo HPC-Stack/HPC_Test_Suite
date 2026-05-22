@@ -23,7 +23,7 @@ class openfoamTest(rfm.RunOnlyRegressionTest):
     tags = {'sciapp', 'cfd', 'openfoam', 'cpu'}
     sourcesdir = '/home/apps/hpc_inputs/applications/OPENFOAM'
     exclusive_access = True
-    modules = ['intel-oneapi-mpi/r4bynxk','openfoam/32llhjn']
+    modules = ['intel-oneapi-mpi/r4bynxk','openfoam/tukqkt5']
     env_vars = {'OMP_NUM_THREADS': '1'}
 
     reference = {
@@ -60,15 +60,6 @@ class openfoamTest(rfm.RunOnlyRegressionTest):
     @run_before('run')
     def setup_env_capture(self):
         add_env_capture(self)
-
-    @run_before('run')
-    def ensure_spack(self):
-        prefix = spack_ensure('openfoam@2312')
-        if prefix:
-            for d in ['bin', 'platforms/*/bin']:
-                for p in glob.glob(os.path.join(prefix, d)):
-                    if os.path.isdir(p):
-                        self.env_vars['PATH'] = f'{p}:$PATH'
 
     @sanity_function
     def validate_program(self):

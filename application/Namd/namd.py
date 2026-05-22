@@ -19,7 +19,9 @@ class NamdTest(rfm.RunOnlyRegressionTest):
     tags = {'sciapp', 'chemistry', 'namd', 'cpu'}
     num_tasks_per_node = 48
     exclusive_access = True
-    executable = 'namd2'
+    sourcesdir = '/home/apps/hpc_inputs/applications/NAMD/'
+    modules = ['mpich/fk63xlk','namd/ld5wmf7']
+    executable = 'namd3'
     executable_opts = ["apoa1.namd > output"]
 
     env_vars = {'OMP_NUM_THREADS': '1'}
@@ -41,12 +43,6 @@ class NamdTest(rfm.RunOnlyRegressionTest):
     @run_before('run')
     def setup_env_capture(self):
         add_env_capture(self)
-
-    @run_before('run')
-    def ensure_spack(self):
-        prefix = spack_ensure('namd')
-        if prefix:
-            self.executable = os.path.join(prefix, 'bin', 'namd2')
 
     @sanity_function
     def validate_program(self):

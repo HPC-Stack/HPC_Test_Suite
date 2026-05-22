@@ -6,9 +6,7 @@ OpenFOAM computational fluid dynamics benchmarks.
 
 | Class | Partition | Description |
 |---|---|---|
-| `openfoamTest` | cpu | simpleFoam motorbike benchmark (96 tasks) |
-| `openfoamTestNew` | cpu | sonicFoam scaling (48-3072 processes) |
-| `openfoamTest_para` | cpu | simpleFoam motorbike scaling (48-384 processes) |
+| `openfoamTest` | cpu | simpleFoam motorbike benchmark (48-384 processes) |
 
 ## Quick Start
 
@@ -16,12 +14,11 @@ OpenFOAM computational fluid dynamics benchmarks.
 reframe -c application/openfoam/ -l
 
 # Run a specific test / variant on CPU partition
-reframe -c application/openfoam/ -n 'openfoamTest' -S valid_systems=paramrudra.snbose:cpu -S valid_prog_environs=gnu -r
-reframe -c application/openfoam/ -n 'openfoamTestNew.*np=48' -S valid_systems=paramrudra.snbose:cpu -S valid_prog_environs=gnu -r
-reframe -c application/openfoam/ -n 'openfoamTest_para.*np=48' -S valid_systems=paramrudra.snbose:cpu -S valid_prog_environs=gnu -r
+reframe -c application/openfoam/ -n 'openfoamTest.*np=48' -S valid_systems=paramrudra.snbose:cpu -S valid_prog_environs=gnu -r
 ```
 
 ## Dependencies
 
 - Module: `openfoam/ggn7wsm`, `intel-oneapi-mpi/3alw73q`
-- Input data: `Motorbike_bench_template.tar.gz` in `src/`
+- Input data: `Motorbike_bench_template.tar.gz` in `/home/apps/hpc_inputs/OPENFOAM` link: https://www.cfdsupport.com/motorbike-cpu-processor-benchmark/
+- Input data: `batteryCooling-12.tar.gz` in `/home/apps/hpc_inputs/OPENFOAM` link:https://holzmann-cfd.com/community/training-cases/battery-cooling

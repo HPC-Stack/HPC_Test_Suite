@@ -14,14 +14,15 @@ from spack_build import spack_ensure
 class lammpsTest(rfm.RunOnlyRegressionTest):
     descr = 'LAMMPS CPU benchmark — LJ melt'
     np = parameter([48, 96, 192, 384])
-    valid_systems = ['*']
+    valid_systems = ['*:cpu']
     valid_prog_environs = ['gnu']
     tags = {'sciapp', 'chemistry', 'lammps', 'cpu'}
     num_tasks_per_node = 48
     exclusive_access = True
+    sourcesdir = '/home/apps/hpc_inputs/applications/LAMMPS'
     executable = 'lmp'
     executable_opts = ["-in in.lj.txt"]
-
+    modules = ['intel-oneapi-mpi/6k65wmi','lammps/rqqtomt']
     env_vars = {'OMP_NUM_THREADS': '1'}
 
     prerun_cmds = ['time \\']
@@ -37,12 +38,6 @@ class lammpsTest(rfm.RunOnlyRegressionTest):
     @run_before('run')
     def setup_env_capture(self):
         add_env_capture(self)
-
-    @run_before('run')
-    def ensure_spack(self):
-        prefix = spack_ensure('lammps@20240205')
-        if prefix:
-            self.executable = os.path.join(prefix, 'bin', 'lmp')
 
     @sanity_function
     def validate_program(self):

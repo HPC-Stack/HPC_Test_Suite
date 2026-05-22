@@ -16,18 +16,17 @@ def parse_time_cmd(s):
 @rfm.simple_test
 class nwchemTest(rfm.RunOnlyRegressionTest):
     descr = 'NWChem CPU benchmark — input.nw'
-    valid_systems = ['*']
+    valid_systems = ['*:cpu']
     valid_prog_environs = ['gnu']
     tags = {'sciapp', 'chemistry', 'nwchem', 'cpu'}
     num_process = parameter([48, 96, 192, 384])
     num_tasks_per_node = 48
-    sourcesdir = 'src'
     exclusive_access = True
-
+    sourcesdir = '/home/apps/hpc_inputs/applications/NWCHEM/'
     prerun_cmds = ['time \\']
-
+    modules = ['openmpi/s3crpr4', 'nwchem/qn3o5ac']
     executable = 'nwchem'
-    executable_opts = ["input.nw"]
+    executable_opts = ["input2.nw"]
 
     reference = {
         '*': {'runtime_real': (0, None, None, 's')},
@@ -44,12 +43,6 @@ class nwchemTest(rfm.RunOnlyRegressionTest):
     @run_before('run')
     def setup_env_capture(self):
         add_env_capture(self)
-
-    @run_before('run')
-    def ensure_spack(self):
-        prefix = spack_ensure('nwchem@7.2.2')
-        if prefix:
-            self.executable = os.path.join(prefix, 'bin', 'nwchem')
 
     @sanity_function
     def validate_program(self):
