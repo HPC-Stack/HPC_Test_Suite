@@ -21,7 +21,7 @@ class GromacsBuildTest(rfm.RegressionTest):
 
     @run_before('compile')
     def setup_build(self):
-        self.build_system.specs = ['gromacs@2024.2']
+        self.build_system.specs = ['gromacs~cuda ^openmpi~cuda schedulers=slurm']
 
     executable = 'gmx_mpi'
     executable_opts = ['--version']
@@ -41,21 +41,31 @@ class gromacTest_cpu(rfm.RunOnlyRegressionTest):
     num_process = parameter([48, 96, 192, 384])
     sourcesdir = '/home/apps/hpc_inputs/applications/GROMACS/'
     exclusive_access = True
-    modules = ['gromacs/fcqi4pl']
-    prerun_cmds = [
+
+    @run_after('init')
+    def add_dependencies(self):
+        self.depends_on('GromacsBuildTest', udeps.by_env)
+
+    @require_deps
+    def prepare_run(self, GromacsBuildTest):
+        gmx = GromacsBuildTest()
+        spack_env = os.path.join(
+            gmx.stagedir,
+            'rfm_spack_env'
+        )
+        self.prerun_cmds += [
+        f'eval `spack -e {spack_env} load --sh gromacs~cuda ^openmpi~cuda schedulers=slurm`',
+        'which gmx_mpi',
+        'which mpirun',
         'tar -xvf water_GMX50_bare.tar.gz',
         'cd water-cut1.0_GMX50_bare/3072',
         'gmx_mpi grompp -f pme.mdp -c conf.gro -p topol.top -o water_pme.tpr',
         'time \\',
     ]
 
+
     executable = 'gmx_mpi'
     executable_opts = ["mdrun -nsteps 5000 -s water_pme.tpr"]
-
-    @run_after('init')
-    def add_dependencies(self):
-        self.depends_on('GromacsBuildTest', udeps.fully)
-
 
     @run_before('run')
     def set_num_task(self):
@@ -98,7 +108,7 @@ class gromacTest_gpu(rfm.RunOnlyRegressionTest):
     ]
 
     executable = 'gmx_mpi'
-    executable_opts = ["mdrun -nsteps 50000 -ntomp 2 -nb gpu -s water_pme.tpr"]
+    executable_opts = ["mdrun -nsteps 500000 -ntomp 2 -nb gpu -s water_pme.tpr"]
 
     @run_before('run')
     def set_num_task(self):
