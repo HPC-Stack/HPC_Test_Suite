@@ -17,13 +17,15 @@ GROMACS molecular dynamics benchmark on Param Rudra cluster.
 reframe -c application/Gromacs/ -l
 
 # Build GROMACS
-reframe -c application/Gromacs/ -n GromacsBuildTest -r
+reframe -c application/Gromacs/ -n GromacsBenchmark -r
 
 # CPU benchmark
-reframe -c application/Gromacs/ -n 'gromacTest_cpu.*num_process=48' -S valid_systems=paramrudra.snbose:cpu -S valid_prog_environs=gnu -r
-
+reframe -c application/Gromacs/ -n GromacsBenchmark -S num_process=48 -S benchmark_type=cpu -S valid_systems=paramrudra.snbose:cpu -S valid_prog_environs=gnu -r
 # GPU benchmark
-reframe -c application/Gromacs/ -n 'gromacTest_gpu.*num_process=48' -S valid_systems=paramrudra.snbose:gpu -S valid_prog_environs=gnu -r
+reframe -c application/Gromacs/ -n GromacsBenchmark -S num_process=8 -S benchmark_type=gpu -S valid_systems=paramrudra.snbose:gpu -S valid_prog_environs=gnu -r
+
+# Replace module 
+reframe -n GromacsBenchmark -M 'gromacs:gromacs/2020.5' -r
 ```
 
 ## Dependencies

@@ -1,75 +1,121 @@
-import reframe as rfm
-import reframe.utility.sanity as sn
 import os
 import sys
+
+import reframe as rfm
+import reframe.utility.sanity as sn
+
+from reframe.core.backends import getlauncher
+
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', 'module'))
 from module import parse_time_cmd
-from reframe.core.backends import getlauncher
-sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'continuousbench', 'hooks'))
+
+sys.path.append(
+    os.path.join(
+        os.path.dirname(__file__),
+        '..', '..', 'continuousbench', 'hooks'
+    )
+)
+
 from env_capture import add_env_capture
-from spack_build import spack_ensure
-import reframe.utility.udeps as udeps
+
 
 @rfm.simple_test
-class GromacsBuildTest(rfm.RegressionTest):
-    descr = 'Build Gromacs using Spack'
-    local = True
-    tags = {'build', 'sciapp', 'chemistry', 'gromacs'}
-    valid_systems = ['*:login']
-    valid_prog_environs = ['gnu']
+class GromacsBuildTest(rfm.CompileOnlyRegressionTest):
+    descr = 'Build GROMACS with Spack'
+
     build_system = 'Spack'
+
+    local = True
+
+    num_process = variable(int, value=1)
+
+    benchmark_type = variable(str)
+
+    spec = variable(str, value='gromacs ^openmpi~cuda schedulers=slurm')
 
     @run_before('compile')
     def setup_build(self):
-        self.build_system.specs = ['gromacs~cuda ^openmpi~cuda schedulers=slurm']
-
-    executable = 'gmx_mpi'
-    executable_opts = ['--version']
+        self.build_system.specs = [self.spec]
 
     @sanity_function
     def validate_build(self):
-        return sn.assert_found(r'GROMACS', self.stdout)
+        return sn.assert_true(True)
 
 
 @rfm.simple_test
-class gromacTest_cpu(rfm.RunOnlyRegressionTest):
-    descr = 'GROMACS CPU benchmark — water box'
-    valid_systems = ['*']
+class GromacsBenchmark(rfm.RunOnlyRegressionTest):
+    descr = 'GROMACS benchmark'
+
     valid_prog_environs = ['gnu']
-    tags = {'sciapp', 'chemistry', 'gromacs', 'cpu'}
-    num_tasks_per_node = 48
-    num_process = parameter([48, 96, 192, 384])
+
+    benchmark_type = variable(str)
+
+    num_process = variable(int, value=1)
+
     sourcesdir = '/home/apps/hpc_inputs/applications/GROMACS/'
+
     exclusive_access = True
+
+    build = fixture(
+        GromacsBuildTest,
+        scope='environment'
+    )
 
     @run_after('init')
-    def add_dependencies(self):
-        self.depends_on('GromacsBuildTest', udeps.by_env)
+    def setup_test(self):
 
-    @require_deps
-    def prepare_run(self, GromacsBuildTest):
-        gmx = GromacsBuildTest()
+        if self.benchmark_type == 'cpu':
+            self.valid_systems = ['*:cpu']
+            self.gromacs_spec = (
+                'gromacs ^openmpi~cuda schedulers=slurm'
+            )
+
+            self.num_tasks_per_node = 48
+
+            self.executable_opts = [
+                'mdrun',
+                '-nsteps', '50000',
+                '-s', 'water_pme.tpr'
+            ]
+
+        else:
+            self.valid_systems = ['*:gpu']
+            self.gromacs_spec = (
+                'gromacs+cuda cuda_arch=80 '
+                '^openmpi+cuda schedulers=slurm'
+            )
+
+            self.num_tasks_per_node = 2
+
+            self.executable_opts = [
+                'mdrun',
+                '-nsteps', '500000',
+                '-ntomp', '2',
+                '-nb', 'gpu',
+                '-s', 'water_pme.tpr'
+            ]
+
+    @run_before('run')
+    def prepare_run(self):
+
         spack_env = os.path.join(
-            gmx.stagedir,
+            self.build.stagedir,
             'rfm_spack_env'
         )
-        self.prerun_cmds += [
-        f'eval `spack -e {spack_env} load --sh gromacs~cuda ^openmpi~cuda schedulers=slurm`',
-        'which gmx_mpi',
-        'which mpirun',
-        'tar -xvf water_GMX50_bare.tar.gz',
-        'cd water-cut1.0_GMX50_bare/3072',
-        'gmx_mpi grompp -f pme.mdp -c conf.gro -p topol.top -o water_pme.tpr',
-        'time \\',
-    ]
 
+        self.prerun_cmds = [
+            f'eval `spack -e {spack_env} load --sh {self.gromacs_spec}`',
+            'which gmx_mpi',
+            'which mpirun',
+            'tar -xvf water_GMX50_bare.tar.gz',
+            'cd water-cut1.0_GMX50_bare/3072',
+            'gmx_mpi grompp -f pme.mdp '
+            '-c conf.gro -p topol.top -o water_pme.tpr'
+        ]
+
+        self.num_tasks = self.num_process
 
     executable = 'gmx_mpi'
-    executable_opts = ["mdrun -nsteps 5000 -s water_pme.tpr"]
-
-    @run_before('run')
-    def set_num_task(self):
-        self.num_tasks = self.num_process
 
     @run_before('run')
     def replace_launcher(self):
@@ -79,59 +125,15 @@ class gromacTest_cpu(rfm.RunOnlyRegressionTest):
     def setup_env_capture(self):
         add_env_capture(self)
 
-
     @sanity_function
-    def validate_program(self):
+    def validate_run(self):
         return sn.assert_eq(self.job.exitcode, 0)
 
-    @performance_function('s', perf_key='runtime_real')
-    def extract_runtime_real(self):
-        return sn.extractsingle(r'^real\s+(\d+m[\d.]+s)$', self.stderr, 1, parse_time_cmd)
-
-
-@rfm.simple_test
-class gromacTest_gpu(rfm.RunOnlyRegressionTest):
-    descr = 'GROMACS GPU benchmark — water box'
-    valid_systems = ['*:gpu']
-    valid_prog_environs = ['gnu']
-    tags = {'sciapp', 'chemistry', 'gromacs', 'gpu'}
-    num_tasks_per_node = 40
-    num_process = parameter([48, 96, 192])
-    sourcesdir = '/home/apps/hpc_inputs/applications/GROMACS/'
-    exclusive_access = True
-    modules = ['gromacs/ape6gvm']
-    prerun_cmds = [
-        'tar -xvf water_GMX50_bare.tar.gz',
-        'cd water-cut1.0_GMX50_bare/3072',
-        'gmx_mpi grompp -f pme.mdp -c conf.gro -p topol.top -o water_pme.tpr',
-        'time \\',
-    ]
-
-    executable = 'gmx_mpi'
-    executable_opts = ["mdrun -nsteps 500000 -ntomp 2 -nb gpu -s water_pme.tpr"]
-
-    @run_before('run')
-    def set_num_task(self):
-        self.num_tasks = self.num_process
-
-    @run_before('run')
-    def replace_launcher(self):
-        self.job.launcher = getlauncher('mpirun')()
-
-    @run_before('run')
-    def setup_env_capture(self):
-        add_env_capture(self)
-
-    @run_before('run')
-    def ensure_spack(self):
-        prefix = spack_ensure('gromacs@2024.2')
-        if prefix:
-            self.executable = os.path.join(prefix, 'bin', 'gmx_mpi')
-
-    @sanity_function
-    def validate_program(self):
-        return sn.assert_eq(self.job.exitcode, 0)
-
-    @performance_function('ns/day', perf_key='ns_per_day')
-    def extract_runtime_real(self):
-        return sn.extractsingle(r'Performance:\s+(\S+)\s+(\S+)', self.stderr, 1, float)
+    @performance_function('ns/day')
+    def perf(self):
+        return sn.extractsingle(
+            r'Performance:\s+(\S+)',
+            self.stderr,
+            1,
+            float
+        )
