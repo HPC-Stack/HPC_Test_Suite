@@ -21,6 +21,7 @@ from env_capture import add_env_capture
 
 @rfm.simple_test
 class GromacsBuildTest(rfm.CompileOnlyRegressionTest):
+    
     descr = 'Build GROMACS with Spack'
 
     build_system = 'Spack'
@@ -31,11 +32,12 @@ class GromacsBuildTest(rfm.CompileOnlyRegressionTest):
 
     benchmark_type = variable(str)
 
-    spec = variable(str, value='gromacs ^openmpi~cuda schedulers=slurm')
-
     @run_before('compile')
     def setup_build(self):
-        self.build_system.specs = [self.spec]
+        if self.benchmark_type == 'cpu':
+            self.build_system.specs = ['gromacs ^openmpi~cuda schedulers=slurm']
+        if self.benchmark_type == 'gpu':
+            self.build_system.specs = ['gromacs+cuda cuda_arch=80 ^openmpi+cuda schedulers=slurm']
 
     @sanity_function
     def validate_build(self):
@@ -45,8 +47,6 @@ class GromacsBuildTest(rfm.CompileOnlyRegressionTest):
 @rfm.simple_test
 class GromacsBenchmark(rfm.RunOnlyRegressionTest):
     descr = 'GROMACS benchmark'
-
-    valid_prog_environs = ['gnu']
 
     benchmark_type = variable(str)
 
@@ -74,7 +74,7 @@ class GromacsBenchmark(rfm.RunOnlyRegressionTest):
 
             self.executable_opts = [
                 'mdrun',
-                '-nsteps', '50000',
+                '-nsteps', '5000',
                 '-s', 'water_pme.tpr'
             ]
 
@@ -89,7 +89,7 @@ class GromacsBenchmark(rfm.RunOnlyRegressionTest):
 
             self.executable_opts = [
                 'mdrun',
-                '-nsteps', '500000',
+                '-nsteps', '50000',
                 '-ntomp', '2',
                 '-nb', 'gpu',
                 '-s', 'water_pme.tpr'

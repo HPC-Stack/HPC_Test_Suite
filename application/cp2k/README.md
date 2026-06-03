@@ -14,7 +14,7 @@ CP2K quantum chemistry and molecular dynamics benchmark.
 reframe -c application/cp2k/ -l
 
 # Run a specific variant on CPU partition
-reframe -c application/cp2k/ -n 'cp2ktest.*num_process=48' -S valid_systems=paramrudra.snbose:cpu -S valid_prog_environs=gnu -r
+reframe -c application/cp2k/ -n cp2ktest -S num_process=48 -S benchmark_type=cpu -S valid_systems=paramrudra.snbose:cpu -S valid_prog_environs=gnu -r
 ```
 
 ## Dependencies

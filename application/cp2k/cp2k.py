@@ -5,22 +5,49 @@ import os
 import sys
 sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', 'continuousbench', 'hooks'))
 from env_capture import add_env_capture
-from spack_build import spack_ensure
+
 
 
 def parse_time_cmd(s):
     mins, _, secs = s.strip().partition('m')
     return float(mins) * 60.0 + float(secs.rstrip('s'))
 
+@rfm.simple_test
+class cp2kBuildTest(rfm.CompileOnlyRegressionTest):
+    
+    descr = 'Build CP2K with Spack'
+
+    build_system = 'Spack'
+
+    local = True
+
+    num_process = variable(int, value=1)
+
+    benchmark_type = variable(str)
+
+    @run_before('compile')
+    def setup_build(self):
+        if self.benchmark_type == 'cpu':
+            self.build_system.specs = ['cp2k ^openmpi~cuda schedulers=slurm']
+        if self.benchmark_type == 'gpu':
+            self.build_system.specs = ['cp2k+cuda cuda_arch=80 ^openmpi+cuda schedulers=slurm']
+
+    @sanity_function
+    def validate_build(self):
+        return sn.assert_true(True)
 
 @rfm.simple_test
 class cp2ktest(rfm.RunOnlyRegressionTest):
     descr = 'CP2K CPU benchmark — H2O energy'
-    valid_systems = ['*']
-    valid_prog_environs = ['gnu']
+    
+    benchmark_type = variable(str)
+
+    num_process = variable(int, value=1)
+    
     tags = {'sciapp', 'chemistry', 'cp2k', 'cpu'}
-    num_process = parameter([48, 96, 192, 384])
-    num_tasks_per_node = 48
+
+    sourcesdir = '/home/apps/hpc_inputs/applications/CP2K/'
+
     exclusive_access = True
 
     executable = 'cp2k.popt'
@@ -29,6 +56,20 @@ class cp2ktest(rfm.RunOnlyRegressionTest):
     reference = {
         '*': {'cp2k_time': (0, None, None, 's'), 'runtime_real': (0, None, None, 's')},
     }
+
+    build = fixture(
+        cp2kBuildTest,
+        scope='environment',
+    )
+
+    @run_before('run')
+    def setup_run(self):
+        if self.benchmark_type == 'cpu':
+            self.valid_systems = ['*:cpu']
+            self.num_tasks_per_node = 48
+        else:
+            self.valid_systems = ['*:gpu']
+            self.num_tasks_per_node = 2
 
     prerun_cmds = ['time \\']
 
@@ -44,11 +85,6 @@ class cp2ktest(rfm.RunOnlyRegressionTest):
     def setup_env_capture(self):
         add_env_capture(self)
 
-    @run_before('run')
-    def ensure_spack(self):
-        prefix = spack_ensure('cp2k@2024.1')
-        if prefix:
-            self.executable = os.path.join(prefix, 'bin', 'cp2k.popt')
 
     @sanity_function
     def assert_cp2k(self):

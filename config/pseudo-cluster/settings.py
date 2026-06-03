@@ -32,6 +32,29 @@ site_configuration = {
                     'access': ['--partition=cpu'],
                     'environs': ['gnu', 'foss', 'intel'],
                     'max_jobs': 100,
+                    'devices': [
+                        # Network Interface Cards
+                        {
+                            'type': 'nic',
+                            'arch': 'ethernet',
+                            'model': 'Intel Ethernet Connection X722',
+                            'num_devices': 4
+                        },
+                        # Memory/NUMA configuration
+                        {
+                            'type': 'memory',
+                            'arch': 'ddr5',
+                            'model': 'DDR5-4800',
+                            'num_devices': 4  # e.g., 4 NUMA nodes
+                        },
+                        # InfiniBand
+                        {
+                            'type': 'infiniband',
+                            'arch': 'hdr',
+                            'model': 'HDR200',
+                            'num_devices': 1
+                        }
+                    ],
                     'processor': {
                         'num_cpus': 48,
                         'num_sockets': 2,
@@ -53,6 +76,29 @@ site_configuration = {
                     'access': ['--partition=hm'],
                     'environs': ['gnu', 'intel'],
                     'max_jobs': 100,
+                    'devices': [
+                        # Network Interface Cards
+                        {
+                            'type': 'nic',
+                            'arch': 'ethernet',
+                            'model': 'Intel Ethernet Connection X722',
+                            'num_devices': 4
+                        },
+                        # Memory/NUMA configuration
+                        {
+                            'type': 'memory',
+                            'arch': 'ddr5',
+                            'model': 'DDR5-4800',
+                            'num_devices': 4  # e.g., 4 NUMA nodes
+                        },
+                        # InfiniBand
+                        {
+                            'type': 'infiniband',
+                            'arch': 'hdr',
+                            'model': 'HDR200',
+                            'num_devices': 1
+                        }
+                    ],
                     'processor': {
                         'num_cpus': 48,
                         'num_sockets': 2,
@@ -80,6 +126,36 @@ site_configuration = {
                     'environs': ['gnu', 'foss', 'nvhpc'],
                     'max_jobs': 100,
                     'features': ['gpu', 'cuda'],       # ← added for skip_unless_any_features
+                    'devices': [
+                        # GPU devices
+                        {
+                            'type': 'gpu',
+                            'arch': 'c80',
+                            'model': 'Nvidia A100',
+                            'num_devices': 2
+                        },
+                        # Network Interface Cards
+                        {
+                            'type': 'nic',
+                            'arch': 'ethernet',
+                            'model': 'Intel Ethernet Connection X722',
+                            'num_devices': 4
+                        },
+                        # Memory/NUMA configuration
+                        {
+                            'type': 'memory',
+                            'arch': 'ddr5',
+                            'model': 'DDR5-4800',
+                            'num_devices': 4  # e.g., 4 NUMA nodes
+                        },
+                        # InfiniBand
+                        {
+                            'type': 'infiniband',
+                            'arch': 'hdr',
+                            'model': 'HDR200',
+                            'num_devices': 1
+                        }
+                    ],
                     'processor': {
                         'num_cpus': 48,
                         'num_sockets': 2,
