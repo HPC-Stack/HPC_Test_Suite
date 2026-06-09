@@ -1,0 +1,53 @@
+name: shavak
+description: single desktop system
+resourcesdir: /home/apps/hpc_inputs/
+stagedir: /home/$USER/reframe/stage
+outputdir: /home/$USER/reframe/output
+generated_at: '2026-06-09T14:51:03.369589'
+partitions:
+- name: cpu
+  type: cpu
+  scheduler: slurm
+  cuda_module: ''
+  devices:
+  - type: nic
+    arch: ethernet
+    model: Intel Ethernet Connection X722
+    num_devices: 4
+  - type: memory
+    arch: ddr5
+    model: DDR5-4800
+    num_devices: 4
+  - type: infiniband
+    arch: hdr
+    model: HDR200
+    num_devices: 1
+  processor:
+    num_cpus: 48
+    num_sockets: 2
+    num_cpus_per_socket: 24
+- name: gpu
+  type: gpu
+  scheduler: slurm
+  cuda_module: cuda@12.5.1/klbpcme
+  devices:
+  - type: gpu
+    arch: c80
+    model: Nvidia A100
+    num_devices: 2
+  - type: nic
+    arch: ethernet
+    model: Intel Ethernet Connection X722
+    num_devices: 4
+  - type: memory
+    arch: ddr5
+    model: DDR5-4800
+    num_devices: 4
+  - type: infiniband
+    arch: hdr
+    model: HDR200
+    num_devices: 1
+  processor:
+    num_cpus: 48
+    num_sockets: 2
+    num_cpus_per_socket: 24

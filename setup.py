@@ -6,8 +6,8 @@ setup(
     description="Continus Bench — Continuous benchmarking and regression analysis for HPC systems",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
-    author="Continus Bench Team",
-    packages=find_packages(include=["continuousbench", "continuousbench.*", "continusbench", "continusbench.*"]),
+    author="HPC Tech Team CDAC",
+    packages=find_packages(include=["continuousbench", "continuousbench.*", "bin", "bin.*"]),
     python_requires=">=3.7",
     install_requires=[
         "typer>=0.4.0",

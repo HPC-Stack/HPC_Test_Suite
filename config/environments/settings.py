@@ -31,7 +31,8 @@ site_configuration = {
             'cc': 'nvc',
             'cxx': 'nvcc',
             'ftn': 'nvfortran',
-            'modules': ['nvhpc/tdc6iex']
+            'modules': ['nvhpc/tdc6iex'],
+            
         }
     ],
 }
