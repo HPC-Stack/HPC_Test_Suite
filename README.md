@@ -118,9 +118,9 @@ reframe -c . -l
 ## Structure
 
 ```
-application/        # 9 HPC application benchmarks (GROMACS, LAMMPS, NAMD, WRF, OpenFOAM, etc.)
-basics/             # 6 "hello world" sanity tests (C, C++, OpenMP, MPI)
 hpctestlib/         # 17 system/hardware tests (HPL, STREAM, OSU, GPU burn, Horovod, etc.)
+  application/        # 9 HPC application benchmarks (GROMACS, LAMMPS, NAMD, WRF, OpenFOAM, etc.)
+  basics/             # 6 "hello world" sanity tests (C, C++, OpenMP, MPI)
 config/             # Multi-file ReFrame configuration
   common/              # Shared settings
   environments/        # Compiler environment definitions
@@ -223,5 +223,4 @@ Two GitHub Actions workflows:
 
 | Document | Contents |
 |----------|----------|
-| [`AGENTS.md`](AGENTS.md) | Complete agent reference — architecture, quirks, all commands |
 | [`continuousbench/README.md`](continuousbench/README.md) | Framework internals, adding benchmarks, CI setup |

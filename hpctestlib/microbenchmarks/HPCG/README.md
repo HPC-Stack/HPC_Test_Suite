@@ -20,7 +20,7 @@ reframe -c hpctestlib/microbenchmarks/HPCG/ -l
 reframe -c hpctestlib/microbenchmarks/HPCG/ -n 'HPCGRunTest.*num_nodes=1' -S valid_systems=paramrudra.snbose:cpu -S valid_prog_environs=gnu -r
 
 # GPU HPCG container
-reframe -c hpctestlib/microbenchmarks/HPCG/ -n 'HPCGGpuContainerTest' -S valid_systems=paramrudra.snbose:gpu -S valid_prog_environs=spack-only -r
+reframe -c hpctestlib/microbenchmarks/HPCG/ -n 'HPCGGpuContainerTest' -S valid_systems=paramrudra.snbose:gpu -S valid_prog_environs=cuda -r
 ```
 
 ## Parameters

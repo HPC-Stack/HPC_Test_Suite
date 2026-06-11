@@ -41,7 +41,7 @@ reframe -c hpctestlib/microbenchmarks/mpi/osu.py \
          -n 'osu_build_run.*benchmark_info=mpi.pt2pt.osu_bw.*build_type=cpu' \
          -S num_tasks=2 \
          -S valid_systems=paramrudra.snbose:cpu \
-         -S valid_prog_environs=gnu \
+         -S valid_prog_environs=foss \
          -r
 
 # Run osu_allreduce collective (build + run, CUDA buffers, 16 ranks)
@@ -58,14 +58,14 @@ reframe -c hpctestlib/microbenchmarks/mpi/osu.py \
          -n 'osu_build_run.*build_type=cpu' \
          -S num_tasks=2 \
          -S valid_systems=paramrudra.snbose:cpu \
-         -S valid_prog_environs=gnu \
+         -S valid_prog_environs=foss \
          -r
 
 # Run only run-only tests (uses pre-installed OSU in PATH)
 reframe -c hpctestlib/microbenchmarks/mpi/osu.py \
          -n 'osu_run.*benchmark_info=mpi.pt2pt.osu_bw' \
          -S valid_systems=paramrudra.snbose:cpu \
-         -S valid_prog_environs=gnu \
+         -S valid_prog_environs=foss \
          -r
 ```
 

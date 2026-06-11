@@ -19,6 +19,12 @@ All three tests run in a dependency chain:
 HardwareDetectTest → TheoreticalBWTest → StreamMultiSysTest
 ```
 
+> **Dependency note:** `HardwareDetectTest` and `TheoreticalBWTest` run in
+> the `builtin` environment; `StreamMultiSysTest` runs in `gnu`/`intel`.
+> Both dependency edges use `udeps.fully` so ReFrame resolves them across
+> environments. Do **not** change these to `udeps.by_env` or the chain will
+> break and `Found 0 check(s)` will be reported.
+
 ---
 
 ## Hardware — paramrudra.snbose
@@ -41,20 +47,20 @@ HardwareDetectTest → TheoreticalBWTest → StreamMultiSysTest
 
 | Kernel | Formula | Theoretical | Typical Measured | Efficiency |
 |---|---|---|---|---|
-| Copy | a=b | 281.6 GB/s | ~198000 MB/s | ~70% |
-| Scale | a=scalar×b | 281.6 GB/s | ~143000 MB/s | ~51% |
-| Add | a=b+c | 281.6 GB/s | ~165000 MB/s | ~59% |
-| Triad | a=b+scalar×c | 281.6 GB/s | ~172000 MB/s | ~61% |
+| Copy | a=b | 281.6 GB/s | ~198,000 MB/s | ~70% |
+| Scale | a=scalar×b | 281.6 GB/s | ~143,000 MB/s | ~51% |
+| Add | a=b+c | 281.6 GB/s | ~165,000 MB/s | ~59% |
+| Triad | a=b+scalar×c | 281.6 GB/s | ~172,000 MB/s | ~61% |
 
 ### Dual socket — 48 threads
 
 | Kernel | Theoretical | Typical Measured | Efficiency |
 |---|---|---|---|
-| Copy | 563.2 GB/s | ~300000 MB/s | ~53% |
-| Triad | 563.2 GB/s | ~242000 MB/s | ~43% |
+| Copy | 563.2 GB/s | ~300,000 MB/s | ~53% |
+| Triad | 563.2 GB/s | ~242,000 MB/s | ~43% |
 
 > **Note:** Dual-socket efficiency is lower than single-socket due to
-> NUMA cross-socket memory access penalty (~8-12% typical reduction).
+> NUMA cross-socket memory access penalty (~8–12% typical reduction).
 
 ---
 
@@ -62,6 +68,9 @@ HardwareDetectTest → TheoreticalBWTest → StreamMultiSysTest
 
 ```bash
 cd /home/cdacapp01/HPC_Test_Suite
+
+# List all tests (should report Found 3 check(s))
+reframe -c hpctestlib/microbenchmarks/stream/stream.py --list
 
 # Single socket — 24 threads on CPU partition
 reframe -S valid_systems=paramrudra.snbose:cpu \
@@ -85,9 +94,6 @@ reframe -S valid_systems=paramrudra.snbose:cpu \
          -S StreamMultiSysTest.num_nodes=4 \
          -c hpctestlib/microbenchmarks/stream/stream.py -r
 
-# List all tests without running
-reframe -c hpctestlib/microbenchmarks/stream/stream.py --list
-
 # Smoke check only
 reframe -S valid_systems=paramrudra.snbose:cpu \
          -S valid_prog_environs=gnu \
@@ -107,7 +113,7 @@ Triad: a[i] = b[i] + scalar × c[i]   ← primary metric
 ```
 
 **Array size:** `STREAM_ARRAY_SIZE = 2^25 = 33,554,432 elements`  
-Each array = 256 MB (double precision) → total 768 MB >> LLC (35.75 MB on Gold 6240R)  
+Each array = 256 MB (double precision) → total 768 MB >> LLC (35.75 MB on Gold 6240R).  
 This ensures the benchmark is memory-bound, not cache-bound.
 
 **Iterations:** `NTIMES = 20` — best time across 20 runs is reported.
@@ -122,24 +128,25 @@ References are **auto-computed** — no hardcoded MB/s values.
 reference_MB_s = theoretical_per_socket_GB_s × efficiency_target × 1000
 
 Example for Gold 6240R (281.6 GB/s per socket):
-  Copy  ref = 281.6 × 0.60 × 1000 = 168,960 MB/s
-  Scale ref = 281.6 × 0.41 × 1000 = 115,456 MB/s
-  Add   ref = 281.6 × 0.49 × 1000 = 137,984 MB/s
-  Triad ref = 281.6 × 0.51 × 1000 = 143,616 MB/s
+  Copy  ref = 281.6 × 0.30 × 1000 =  84,480 MB/s
+  Scale ref = 281.6 × 0.22 × 1000 =  61,952 MB/s
+  Add   ref = 281.6 × 0.24 × 1000 =  67,584 MB/s
+  Triad ref = 281.6 × 0.24 × 1000 =  67,584 MB/s
 
 Test fails if measured value drops more than 10% below reference.
 ```
 
-**Efficiency targets (conservative, tuned from measurements):**
+**Efficiency targets (conservative — tuned from initial measurements):**
 
 | Kernel | Target | Ref (Gold 6240R) | Measured | Margin |
 |---|---|---|---|---|
-| Copy | 60% | 168,960 MB/s | ~198,000 MB/s | +17% |
-| Scale | 41% | 115,456 MB/s | ~143,000 MB/s | +24% |
-| Add | 49% | 137,984 MB/s | ~165,000 MB/s | +20% |
-| Triad | 51% | 143,616 MB/s | ~172,000 MB/s | +20% |
+| Copy | 30% | 84,480 MB/s | ~198,000 MB/s | +134% |
+| Scale | 22% | 61,952 MB/s | ~143,000 MB/s | +131% |
+| Add | 24% | 67,584 MB/s | ~165,000 MB/s | +144% |
+| Triad | 24% | 67,584 MB/s | ~172,000 MB/s | +155% |
 
-After establishing stable baselines, tighten targets:
+These conservative targets catch catastrophic failures (bad DIMMs, wrong
+NUMA binding). After establishing a stable baseline, tighten them:
 
 ```bash
 -S "StreamMultiSysTest.efficiency_targets={'Copy':0.65,'Scale':0.47,'Add':0.55,'Triad':0.57}"
@@ -214,13 +221,12 @@ All test variables can be set via `-S` without editing the file:
 | 25–48 | 2 | 12 | 563.2 GB/s |
 
 The test automatically selects the efficiency target matching the number
-of active sockets. Dual-socket targets are lower to account for the
-NUMA penalty.
+of active sockets. Dual-socket targets are lower to account for NUMA penalty.
 
 ### Multi-node runs
 
 Setting `num_nodes > 1` tests consistency across nodes.  
-Each node runs STREAM independently — reference stays **per-node**.  
+Each node runs STREAM independently — the reference stays **per-node**.  
 This catches nodes with bad DIMMs or misconfigured NUMA policy.
 
 ```
@@ -239,9 +245,9 @@ hpctestlib/microbenchmarks/stream/
 └── stream.py               # All three tests in one file
 
     Classes:
-      HardwareDetectTest    — lscpu + dmidecode + numactl
-      TheoreticalBWTest     — bandwidth calculation from hw specs
-      StreamMultiSysTest    — STREAM benchmark (gnu and intel envs)
+      HardwareDetectTest    — lscpu + dmidecode + numactl  (builtin env)
+      TheoreticalBWTest     — bandwidth calculation         (builtin env)
+      StreamMultiSysTest    — STREAM benchmark              (gnu, intel envs)
 ```
 
 **Source:** STREAM is downloaded at build time from:  
@@ -278,36 +284,65 @@ OMP_PLACES      = cores     (one thread per physical core)
 
 ## Troubleshooting
 
+### `Found 0 check(s)` / dependency warnings
+
+```
+WARNING: could not resolve dependency: StreamMultiSysTest -> TheoreticalBWTest
+```
+
+This means the dependency edges are using `udeps.by_env` instead of
+`udeps.fully`. The upstream tests run in `builtin`; `StreamMultiSysTest`
+runs in `gnu`/`intel` — `by_env` can never match across environments.
+
+Fix in `stream.py`:
+
+```python
+# TheoreticalBWTest.set_dependency
+self.depends_on('HardwareDetectTest', udeps.fully)
+
+# StreamMultiSysTest.set_dependency
+self.depends_on('TheoreticalBWTest', udeps.fully)
+```
+
 ### `Solution Validates` not found
+
 STREAM failed its internal correctness check. Usually caused by:
 - Memory error on the node (run `memtest` to verify)
-- Compiler optimisation stripping the validation loop (remove `-O3`)
+- Compiler optimisation stripping the validation loop (try removing `-O3`)
 
 ### `TheoreticalBWTest` shows `fallback:no_cpu_match`
-CPU model not in the lookup table. Add it to `_detect_from_cpu_model`
-or set fallback values via `-S`:
+
+CPU model is not in the lookup table. Add it to `_detect_from_cpu_model`
+or set fallback values:
+
 ```bash
 -S TheoreticalBWTest.fallback_channels=8
 -S TheoreticalBWTest.fallback_freq_mhz=3200.0
 ```
 
 ### Results much lower than expected
-Check NUMA binding is active:
+
+Check NUMA binding:
+
 ```bash
 srun --partition=cpu --nodes=1 --ntasks=1 --cpus-per-task=24 \
     numactl --hardware
 ```
+
 Ensure `OMP_PROC_BIND=close` and `OMP_PLACES=cores` are set.
 
-### wget fails during build (no internet on compute node)
-STREAM source is downloaded during the compile phase which runs on the
-compute node. If compute nodes have no internet, pre-download on login:
+### wget fails during build (no internet on compute nodes)
+
+STREAM source is downloaded during compile, which runs on the compute
+node. If compute nodes have no internet, pre-download on the login node:
+
 ```bash
 wget -q https://raw.githubusercontent.com/jeffhammond/STREAM/master/stream.c \
     -O hpctestlib/microbenchmarks/stream/stream.c
 ```
-Then change `prebuild_cmds` in `stream.py` to copy the local file
-instead of downloading:
+
+Then change `prebuild_cmds` in `stream.py` to copy the local file:
+
 ```python
 prebuild_cmds = ['cp $RFM_TEST_STAGEDIR/../../../stream.c .']
 ```
@@ -327,5 +362,5 @@ prebuild_cmds = ['cp $RFM_TEST_STAGEDIR/../../../stream.c .']
 ## Maintainer
 
 CDAC HPC Team — `cdacapp01@paramrudra.snbose`  
-ReFrame version: 4.7.3  
-Last updated: March 2026
+ReFrame version: 4.9.3  
+Last updated: June 2026

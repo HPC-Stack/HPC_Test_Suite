@@ -11,10 +11,10 @@ class HPCGRunTest(rfm.RunOnlyRegressionTest):
     valid_systems = ['paramrudra.snbose:cpu', 'paramrudra.snbose:hm', 'paramrudra.snbose:gpu']
     valid_prog_environs = ['gnu']
 
-    nx = parameter([104])
-    ny = parameter([104])
-    nz = parameter([104])
-    running_time = parameter([60])
+    nx = parameter([384])
+    ny = parameter([384])
+    nz = parameter([384])
+    running_time = parameter([1800])
     num_nodes = parameter([1, 2])
 
     @run_before('run')
@@ -122,7 +122,7 @@ class FetchNvidiaHPCG(rfm.RunOnlyRegressionTest):
 class BuildNvidiaHPCG(rfm.RunOnlyRegressionTest):
     descr = 'Build NVIDIA HPCG for GPU'
     valid_systems = ['paramrudra.snbose:gpu']
-    valid_prog_environs = ['spack-only']
+    valid_prog_environs = ['nvhpc']
 
     hpcg_source = fixture(FetchNvidiaHPCG, scope='session')
 

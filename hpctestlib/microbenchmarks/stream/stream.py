@@ -65,11 +65,10 @@ class HardwareDetectTest(rfm.RunOnlyRegressionTest):
     '''
 
     valid_systems = ['*']
-    valid_prog_environs = ['builtin']
     tags = {'hw', 'smoke', 'microbenchmark'}
     time_limit = '5m'
     executable = 'bash'
-
+    valid_prog_environs = ['builtin', 'gnu', 'intel']
     @run_before('run')
     def write_detect_script(self):
         lines = [
@@ -115,7 +114,7 @@ class TheoreticalBWTest(rfm.RunOnlyRegressionTest):
     '''
 
     valid_systems = ['*']
-    valid_prog_environs = ['builtin']
+    valid_prog_environs = ['builtin', 'gnu', 'intel']
     tags = {'hw', 'microbenchmark'}
     time_limit = '2m'
 
@@ -135,7 +134,7 @@ class TheoreticalBWTest(rfm.RunOnlyRegressionTest):
 
     @run_after('init')
     def set_dependency(self):
-        self.depends_on('HardwareDetectTest', udeps.by_env)
+        self.depends_on('HardwareDetectTest', udeps.fully)
 
     @run_before('sanity')
     def parse_hw_output(self):
@@ -332,7 +331,7 @@ class StreamMultiSysTest(rfm.RegressionTest):
 
     @run_after('init')
     def set_dependency(self):
-        self.depends_on('TheoreticalBWTest', udeps.by_env)
+        self.depends_on('TheoreticalBWTest', udeps.fully)
 
     @run_before('compile')
     def set_compiler_flags(self):
