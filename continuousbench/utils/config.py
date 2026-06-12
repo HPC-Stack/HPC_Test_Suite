@@ -14,9 +14,9 @@ class ConfigManager:
         self.generated_dir = os.path.join(self.config_dir, 'generated')
 
     def list_systems(self):
-        pattern = os.path.join(self.systems_dir, "*.yaml")
+        pattern = os.path.join(self.systems_dir, "**", "*.yaml")
         systems = {}
-        for fpath in sorted(glob.glob(pattern)):
+        for fpath in sorted(glob.glob(pattern, recursive=True)):
             name = os.path.splitext(os.path.basename(fpath))[0]
             with open(fpath) as f:
                 data = yaml.safe_load(f)

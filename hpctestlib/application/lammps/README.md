@@ -11,7 +11,7 @@ LAMMPS molecular dynamics benchmark on high-memory nodes.
 ## Quick Start
 
 ```bash
-reframe -c application/lammps/ -l
+reframe -c application/lammps/ -S valid_systems=paramrudra.snbose:hm -S valid_prog_environs=gnu -l
 
 # Run a specific variant on high-memory partition
 reframe -c application/lammps/ -n 'lammpsTest.*np=48' -S valid_systems=paramrudra.snbose:hm -S valid_prog_environs=gnu -r

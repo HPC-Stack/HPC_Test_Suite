@@ -6,7 +6,7 @@ tags: [smoke, cpu, basics]
 systems:
   - paramrudra.snbose:cpu
 environ: gnu
-source: basics/hello/hello1.py
+source: hpctestlib/basics/hello/hello1.py
 parameters: {}
 resources:
   num_tasks: 1

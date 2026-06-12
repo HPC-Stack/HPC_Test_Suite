@@ -127,11 +127,15 @@ class BenchmarkRunner:
         ]
         if sys_arg:
             cmd.extend(["--system", sys_arg])
+            cmd.extend(["-S", f"valid_systems={sys_arg}"])
         if tag:
             cmd.extend(["-t", tag])
         name_filter = spec.get("name_filter")
         if name_filter:
             cmd.extend(["-n", name_filter])
+        overrides = spec.get("overrides", {})
+        for key, value in overrides.items():
+            cmd.extend(["-S", f"{key}={value}"])
 
         print(f"Running: {' '.join(cmd)}")
         if dry_run:

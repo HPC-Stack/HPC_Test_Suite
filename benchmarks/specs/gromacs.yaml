@@ -1,27 +1,12 @@
 name: gromacs
-description: GROMACS molecular dynamics benchmark
-tags: [sciapp, gromacs, cpugpu]
-systems: ['*']
+description: GROMACS molecular dynamics benchmark (single-node CPU)
+source: hpctestlib/application/Gromacs/gromacs.py
+system: paramrudra.snbose:cpu
 environ: gnu
-source: hpctestlib/sciapps/gromacs/benchmarks.py
-spack_spec: gromacs@2024.2
-binary: gmx_mpi
+tag: gromacs
+tags: [sciapp, gromacs]
+systems: ['*']
 time_limit: 60m
-perf_unit: ns/day
-perf_regex: r'Performance:\s+(\S+)'
-
-benchmarks:
-  - name: gromacs_cpu
-    class_name: GromacsCpuBench
-    params:
-      nsteps: [5000]
-    num_tasks: 16
-    tags: [sciapp, gromacs, cpu, nightly]
-
-  - name: gromacs_gpu
-    class_name: GromacsGpuBench
-    params:
-      nsteps: [5000]
-    num_tasks: 4
-    num_gpus_per_node: 1
-    tags: [sciapp, gromacs, gpu, nightly]
+name_filter: GromacsBenchmark.*nb_impl=cpu
+overrides:
+  num_tasks_per_node: 48
