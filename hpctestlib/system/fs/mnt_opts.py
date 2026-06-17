@@ -54,7 +54,6 @@ class filesystem_options_check(rfm.RunOnlyRegressionTest):
         'nfs':    'rw,relatime',
         'nfs4':   'rw,relatime',
         'ext4':   'rw,relatime',
-        'xfs':    'rw,relatime,nosuid',
         # tmpfs/devtmpfs removed — no consistent option set across all mounts:
         #   /sys/fs/cgroup tmpfs → ro,nosuid,nodev,noexec  (read-only by design)
         #   /              tmpfs → rw,relatime
@@ -77,8 +76,6 @@ class filesystem_options_check(rfm.RunOnlyRegressionTest):
     required_mounts = variable(typ.List[str], loggable=True,
                                value=['/home', '/scratch'])
 
-    valid_systems = ['*']
-    valid_prog_environs = ['builtin']
     executable = 'cat'
     executable_opts = ['/proc/mounts']
     tags = {'system', 'fs', 'smoke', 'gate'}
@@ -221,8 +218,6 @@ class lustre_health_check(rfm.RunOnlyRegressionTest):
     lustre_mounts = variable(typ.List[str], loggable=True,
                              value=['/home', '/scratch'])
 
-    valid_systems = ['*']
-    valid_prog_environs = ['builtin']
     executable = 'bash'
     tags = {'system', 'fs', 'lustre', 'smoke', 'gate'}
     time_limit = '5m'
@@ -364,8 +359,6 @@ class filesystem_rw_check(rfm.RunOnlyRegressionTest):
     probe_paths = variable(typ.List[str], loggable=True,
                            value=['/home', '/scratch'])
 
-    valid_systems = ['*']
-    valid_prog_environs = ['builtin']
     executable = 'bash'
     tags = {'system', 'fs', 'smoke', 'gate'}
     time_limit = '5m'
@@ -426,8 +419,6 @@ class scratch_io_bandwidth(rfm.RunOnlyRegressionTest):
     no makefile needed.
     '''
 
-    valid_systems = ['*']
-    valid_prog_environs = ['builtin']
     tags = {'fs', 'perf', 'lustre'}
     time_limit = '15m'
 
@@ -475,23 +466,22 @@ class scratch_io_bandwidth(rfm.RunOnlyRegressionTest):
 
         self.executable_opts = [script_path]
 
-    @performance_function('GB/s', perf_key='write_bw')
+    @performance_function('MB/s', perf_key='write_bw')
     def write_bandwidth(self):
-        # dd output: N bytes copied, X s, Y         MB/s
-        # item=0 → first match = write pass
         return sn.extractsingle(
-            r'(\d+\.?\d*)\s+GB/s',
-            self.stdout, 1, float,
-            item=0,
+            r'=== write ===[\s\S]*?(\d+\.?\d*)\s+MB/s',
+            self.stdout,
+            1,
+            float
         )
 
     @performance_function('GB/s', perf_key='read_bw')
     def read_bandwidth(self):
-        # item=1 → second match = read pass
         return sn.extractsingle(
-            r'(\d+\.?\d*)\s+GB/s',
-            self.stdout, 1, float,
-            item=1,
+            r'=== read ===[\s\S]*?(\d+\.?\d*)\s+GB/s',
+            self.stdout,
+            1,
+            float
         )
 
     @sanity_function

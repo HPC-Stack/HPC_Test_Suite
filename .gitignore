@@ -12,6 +12,7 @@ __pycache__/
 *.log
 *.json.bak
 .env
+.venv
 *.egg-info
 AGENTS.md
 HPC_Test_Suite.code-workspace

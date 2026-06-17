@@ -1,8 +1,7 @@
 # HPC Test Suite — Filesystem Checks
 
 Production-grade ReFrame tests for validating Lustre filesystem health on HPC clusters.
-Developed and verified on **Param Rudra (paramrudra.snbose)** with AlmaLinux 8/9 CPU nodes
-and Ubuntu GPU nodes (Grace Hopper).
+Developed and verified on **Param Rudra (paramrudra.snbose)** with AlmaLinux 8/9 CPU nodes.
 
 ---
 
@@ -171,7 +170,7 @@ Replace `<your_system>` with the `name` value from your `pseudo-cluster/settings
 
 ```bash
 # ci/rfm.sh handles the -C flag so you don't have to type the full path chain
-./ci/rfm.sh -c hpctestlib/system/fs/mnt_opts.py \
+reframe -c hpctestlib/system/fs/mnt_opts.py \
   -S valid_systems=paramrudra.snbose:cpu \
   -S valid_prog_environs=gnu \
   -r
