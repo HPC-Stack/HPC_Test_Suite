@@ -21,7 +21,7 @@ site_configuration = {
                     'extras': {'lfs_available': False},
                     'scheduler': 'local',
                     'launcher': 'local',
-                    'environs': ['gnu', 'intel', 'foss'],
+                    'environs': ['gnu', 'intel', 'foss', 'nvhpc'],
                     'max_jobs': 100,
                     'processor': {
                         'num_cpus': 48,

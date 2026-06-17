@@ -12,8 +12,7 @@ import reframe.utility.sanity as sn
 class HelloMultiLangTest(rfm.RegressionTest):
     lang = parameter(['c', 'cpp'])
 
-    valid_systems = ['*']
-    valid_prog_environs = ['gnu','intel','nvhpc']
+
     sourcesdir = 'src'
     tags = {'smoke', 'cpu', 'basics', 'multilang'}
     # rfmdocstart: set_sourcepath

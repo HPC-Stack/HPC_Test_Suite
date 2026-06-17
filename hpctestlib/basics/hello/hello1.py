@@ -10,8 +10,7 @@ import reframe.utility.sanity as sn
 
 @rfm.simple_test
 class HelloTest(rfm.RegressionTest):
-    valid_systems = ['*:cpu']
-    valid_prog_environs = ['gnu']
+
     sourcesdir = 'src'
     sourcepath = 'hello.c'
     tags = {'smoke', 'cpu', 'basics'}
