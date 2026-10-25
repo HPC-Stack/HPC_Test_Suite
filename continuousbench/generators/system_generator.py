@@ -105,14 +105,14 @@ def _collect_devices(pname, ptype):
     if questionary.confirm(f"  Add NIC device to '{pname}'?", default=True).ask():
         arch  = questionary.text("  NIC arch (e.g. ethernet, infiniband):", default="ethernet").ask() or "ethernet"
         model = questionary.text("  NIC model:", default="Intel Ethernet Connection X722").ask()
-        num   = _ask_int("  Number of NICs:", 4)
+        num   = _ask_int("  Number of NICs:", 1)
         devices.append({"type": "nic", "arch": arch, "model": model, "num_devices": num})
 
     # Memory/NUMA
     if questionary.confirm(f"  Add Memory/NUMA device to '{pname}'?", default=True).ask():
         arch  = questionary.text("  Memory arch (e.g. ddr5, ddr4):", default="ddr5").ask() or "ddr5"
         model = questionary.text("  Memory model (e.g. DDR5-4800):", default="DDR5-4800").ask()
-        num   = _ask_int("  Number of NUMA nodes:", 4)
+        num   = _ask_int("  Number of NUMA nodes:", 2)
         devices.append({"type": "memory", "arch": arch, "model": model, "num_devices": num})
 
     # InfiniBand

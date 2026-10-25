@@ -40,7 +40,7 @@ reframe -c hpctestlib/microbenchmarks/mpi/osu.py --list
 reframe -c hpctestlib/microbenchmarks/mpi/osu.py \
          -n 'osu_build_run.*benchmark_info=mpi.pt2pt.osu_bw.*build_type=cpu' \
          -S num_tasks=2 \
-         -S valid_systems=paramrudra.snbose:cpu \
+         -S valid_systems=paramrudra.cdacb:cpu \
          -S valid_prog_environs=foss \
          -r
 
@@ -49,7 +49,7 @@ reframe -c hpctestlib/microbenchmarks/mpi/osu.py \
          -n 'osu_build_run.*benchmark_info=mpi.collective.osu_allreduce.*build_type=cuda' \
          -S device_buffers=cuda \
          -S num_tasks=16 \
-         -S valid_systems=paramrudra.snbose:cpu \
+         -S valid_systems=paramrudra.snbose:gpu \
          -S valid_prog_environs=foss \
          -r
 

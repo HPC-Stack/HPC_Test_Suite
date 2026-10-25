@@ -245,8 +245,7 @@ class HPLCPUTest(rfm.RunOnlyRegressionTest):
                  -S HPLCPUTest.num_tasks=48 -r
     '''
 
-    valid_systems       = ['paramrudra.snbose:cpu', 'paramrudra.snbose:hm']
-    valid_prog_environs = ['foss']
+    
     tags       = {'perf', 'compute', 'hpl', 'cpu'}
     time_limit = '2h'
     executable = 'xhpl'
@@ -256,7 +255,7 @@ class HPLCPUTest(rfm.RunOnlyRegressionTest):
     # -------------------------------------------------------------------
 
     #: HPL module — verify hash with: spack find --paths hpl
-    hpl_module = variable(str, value='hpl/pp7qab2', loggable=True)
+    hpl_module = variable(str, value='hpl/zppe3zb', loggable=True)
 
     #: NB block size — 128/192/256 typical for Cascade Lake
     nb_size = variable(int, value=256, loggable=True)

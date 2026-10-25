@@ -130,7 +130,7 @@ class BuildNvidiaHPCG(rfm.RunOnlyRegressionTest):
     def setup_build(self):
         try:
             nvhpc_path = subprocess.check_output(
-                ['spack', 'location', '-i', 'nvhpc@24.5/tdc6iex'],
+                ['spack', 'location', '-i', 'nvhpc/n62w34u'],
                 text=True
             ).strip()
             cuda_home = f'{nvhpc_path}/Linux_x86_64/24.5/cuda/12.4'

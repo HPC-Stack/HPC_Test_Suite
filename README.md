@@ -14,8 +14,11 @@ A complete testing and benchmarking framework for HPC applications, built on **R
 # 1. Clone the repository
 git clone <repo-url>
 cd HPC_Test_Suite
+. setup-env.sh
 
 # 2. Install everything (reframe + continusbench + dependencies)
+python3 -m venv my-env
+. my-env/bin/activate
 pip install -r requirements.txt
 pip install -e .
 

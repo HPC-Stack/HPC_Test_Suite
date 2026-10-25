@@ -14,64 +14,30 @@ sys.path.append(os.path.join(os.path.dirname(__file__), '..', '..', '..', 'conti
 from env_capture import add_env_capture
 
 
-class fetch_osu_benchmarks(rfm.RunOnlyRegressionTest):
-    '''Fixture for fetching the OSU benchmarks.'''
+@rfm.simple_test
+class OsuBuildTest(rfm.CompileOnlyRegressionTest):
+    descr = 'Build OSU micro-benchmarks with Spack'
 
-    #: The version of the benchmarks to fetch.
-    #:
-    #: :type: :class:`str`
-    #: :default: ``'5.9'``
-    version = variable(str, value='5.9')
-
+    valid_systems = ['*']
+    valid_prog_environs = ['*']
+    build_system = 'Spack'
     local = True
-    osu_file_name = f'osu-micro-benchmarks-{version}.tar.gz'
-    executable = f'curl -LJO http://mvapich.cse.ohio-state.edu/download/mvapich/{osu_file_name}'  # noqa: E501
+    build_type = parameter(['cpu', 'cuda'])
 
-    @sanity_function
-    def validate_download(self):
-        return sn.assert_eq(self.job.exitcode, 0)
-
-
-class build_osu_benchmarks(rfm.CompileOnlyRegressionTest):
-    '''Fixture for building the OSU benchmarks'''
-    #: Build variant parameter.
-    #:
-    #: :type: :class:`str`
-    #: :values: ``'cpu', 'cuda', 'rocm', 'openacc'``
-    build_type = parameter(['cpu', 'cuda', 'rocm', 'openacc'])
-
-    build_system = 'Autotools'
-    build_prefix = variable(str)
-
-    #: The fixture object that retrieves the benchmarks
-    #:
-    #: :type: :class:`fetch_osu_benchmarks`
-    #: :scope: *session*
-    osu_benchmarks = fixture(fetch_osu_benchmarks, scope='session')
+    spack_spec = variable(str)
 
     @run_before('compile')
-    def prepare_build(self):
-        tarball = f'osu-micro-benchmarks-{self.osu_benchmarks.version}.tar.gz'
-        self.build_prefix = tarball[:-7]  # remove .tar.gz extension
-        fullpath = os.path.join(self.osu_benchmarks.stagedir, tarball)
-        self.prebuild_cmds += [
-            f'cp {fullpath} {self.stagedir}',
-            f'tar xzf {tarball}',
-            f'cd {self.build_prefix}',
-            f'export CUDA_HOME=$(spack location -i cuda/7zllz2)',
-            f'export LIBRARY_PATH=$CUDA_HOME/targets/x86_64-linux/lib/stubs:$LIBRARY_PATH',
-            f'export LD_LIBRARY_PATH=$CUDA_HOME/lib64:$LD_LIBRARY_PATH'
-        ]
-        self.build_system.cc = 'mpicc'
-        self.build_system.cxx = 'mpicxx'
-        self.build_system.config_opts = [f'--enable-{self.build_type}']
-        self.build_system.make_opts = ['-C', 'mpi']
-        self.build_system.max_concurrency = 8
+    def setup_build(self):
+        mapping = {
+            'cpu': 'osu-micro-benchmarks ~cuda ~rocm ^openmpi',
+            'cuda': 'osu-micro-benchmarks +cuda cuda_arch=80 ^openmpi+cuda cuda_arch=80',
+        }
+        self.spack_spec = mapping[self.build_type]
+        self.build_system.specs = [self.spack_spec]
 
     @sanity_function
     def validate_build(self):
-        # If build fails, the test will fail before reaching this point.
-        return True
+        return sn.assert_true(True)
 
 
 class osu_benchmark(rfm.RunOnlyRegressionTest):
@@ -80,62 +46,14 @@ class osu_benchmark(rfm.RunOnlyRegressionTest):
     valid_systems = ['*']
     valid_prog_environs = ['*']
 
-    #: Number of warmup iterations.
-    #:
-    #: This value is passed to the excutable through the -x option.
-    #:
-    #: :type: :class:`int`
-    #: :default: ``10``
     num_warmup_iters = variable(int, value=10)
-
-    #: Number of iterations.
-    #:
-    #: This value is passed to the excutable through the -i option.
-    #:
-    #: :type: :class:`int`
-    #: :default: ``1000``
     num_iters = variable(int, value=1000)
-
-    #: Maximum message size.
-    #:
-    #: Both the performance and the sanity checks will be done
-    #: for this message size.
-    #:
-    #: This value is set to ``8`` for latency benchmarks and to ``4194304`` for
-    #: bandwidth benchmarks.
-    #:
-    #: :type: :class:`int`
     message_size = variable(int)
-
-    #: Device buffers.
-    #:
-    #: Use accelerator device buffers.
-    #: Valid values are ``cpu``, ``cuda``, ``openacc`` or ``rocm``.
-    #:
-    #: :type: :class:`str`
-    #: :default: ``'cpu'``
     device_buffers = variable(str, value='cpu')
 
-    #: Number of tasks to use.
-    #:
-    #: This variable is required.
-    #: It is set to ``2`` for point to point benchmarks, but it is undefined
-    #: for collective benchmarks
-    #:
-    #: :required: Yes
     num_tasks = required
     num_tasks_per_node = 1
 
-    #: Parameter indicating the available benchmark to execute.
-    #:
-    #: :type: 2-element tuple containing the benchmark name and whether latency
-    #:   or bandwidth is to be measured.
-    #:
-    #: :values:
-    #:   ``mpi.collective.osu_alltoall``,
-    #:   ``mpi.collective.osu_allreduce``,
-    #:   ``mpi.pt2pt.osu_bw``,
-    #:   ``mpi.pt2pt.osu_latency``
     benchmark_info = parameter([
         ('mpi.collective.osu_alltoall', 'latency'),
         ('mpi.collective.osu_allreduce', 'latency'),
@@ -145,8 +63,7 @@ class osu_benchmark(rfm.RunOnlyRegressionTest):
 
     @run_before('run')
     def replace_launcher(self):
-        self.job.launcher = getlauncher('srun')()
-        self.job.launcher.options = ['--mpi=pmix']
+        self.job.launcher = getlauncher('mpirun')()
 
     @run_before('setup')
     def setup_per_benchmark(self):
@@ -161,7 +78,7 @@ class osu_benchmark(rfm.RunOnlyRegressionTest):
             raise ValueError(f'unknown benchmark metric: {bench_metric}')
 
         self.executable = bench.split('.')[-1]
-        self.executable_opts = ['-m', f'{self.message_size}',
+        self.executable_opts = ['-m', f'1:{self.message_size}',
                                 '-x', f'{self.num_warmup_iters}',
                                 '-i', f'{self.num_iters}', '-c']
 
@@ -190,7 +107,7 @@ class osu_benchmark(rfm.RunOnlyRegressionTest):
 
 @rfm.simple_test
 class osu_run(osu_benchmark):
-    '''Run-only OSU benchmark test'''
+    '''Run-only OSU benchmark test (binary must be in PATH)'''
 
     @run_before('run')
     def setup_env_capture(self):
@@ -199,18 +116,19 @@ class osu_run(osu_benchmark):
 
 @rfm.simple_test
 class osu_build_run(osu_benchmark):
-    '''OSU benchmark test (build and run)'''
+    '''OSU benchmark test (build and run via Spack)'''
 
-    #: The fixture object that builds the OSU binaries
-    #:
-    #: :type: :class:`build_osu_benchmarks`
-    #: :scope: *environment*
-    osu_binaries = fixture(build_osu_benchmarks, scope='environment')
+    build = fixture(OsuBuildTest, scope='environment')
 
     @run_before('run')
-    def prepend_build_prefix(self):
+    def setup_env_capture(self):
         add_env_capture(self)
-        bench_path = self.benchmark_info[0].replace('.', '/')
-        self.executable = os.path.join(self.osu_binaries.stagedir,
-                                       self.osu_binaries.build_prefix,
-                                       bench_path)
+
+    @run_before('run')
+    def load_spack_env(self):
+        spack_env = os.path.join(self.build.stagedir, 'rfm_spack_env')
+        spec = self.build.spack_spec
+        self.prerun_cmds = [
+            f'eval `spack -e {spack_env} load --sh {spec}`',
+            f'which {self.executable}',
+        ]

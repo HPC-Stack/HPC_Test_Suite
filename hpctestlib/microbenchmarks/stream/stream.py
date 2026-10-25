@@ -287,9 +287,6 @@ class StreamMultiSysTest(rfm.RegressionTest):
         Add:   ~165000 MB/s (~59%)   Triad: ~172000 MB/s (~61%)
     '''
 
-    valid_systems = ['*']
-    valid_prog_environs = ['gnu', 'intel']
-
     prebuild_cmds = [
         'wget -q https://raw.githubusercontent.com/jeffhammond/STREAM/master/stream.c'
     ]

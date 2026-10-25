@@ -1,0 +1,5 @@
+
+urls:
+  reframe: https://github.com/reframe-hpc/reframe.git
+  spack: https://github.com/spack/spack.git
+  spack-packages: https://github.com/spack/spack-packages.git

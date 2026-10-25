@@ -12,8 +12,8 @@ site_configuration = {
             'hostnames': ['.*'],
             'modules_system': 'spack',
             'resourcesdir': '/home/apps/hpc_inputs/',
-            'stagedir': '/scratch/$USER/reframe/stage',
-            'outputdir': '/scratch/$USER/reframe/output',
+            'stagedir': '/scratch/nsmapplication/$USER/reframe/stage',
+            'outputdir': '/scratch/nsmapplication/$USER/reframe/output',
             'partitions': [
                 {
                     'name': 'login',
@@ -115,7 +115,7 @@ site_configuration = {
                     'name': 'gpu',
                     'descr': 'GPU nodes — NVIDIA',
                     'extras': {'lfs_available': True},
-                    'modules': ['cuda@12.5.1/bmdsau7'],
+                    'modules': ['cuda/jlytfxg'],
                     'scheduler': 'slurm',
                     'launcher': 'local',
                     'access': ['--partition=gpu', '--gres=gpu:2', '--time=10:00:00'],

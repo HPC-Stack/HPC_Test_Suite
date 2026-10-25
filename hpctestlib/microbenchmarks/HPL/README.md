@@ -52,7 +52,7 @@ reframe -c hpctestlib/microbenchmarks/HPL/hpl.py --list
 
 # CPU — 48 MPI ranks (both sockets, auto-computes N and P×Q)
 reframe -c hpctestlib/microbenchmarks/HPL/hpl.py -n HPLCPUTest \
-         -S valid_systems=paramrudra.snbose:cpu \
+         -S valid_systems=paramrudra.cdacb:cpu \
          -S HPLCPUTest.num_tasks=48 -r
 
 # CPU — 24 MPI ranks (single socket)

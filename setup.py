@@ -13,7 +13,7 @@ setup(
         "typer>=0.4.0",
         "questionary>=1.10.0",
         "pyyaml>=5.1",
-        "reframe-hpc>=4.7.3",
+        "reframe-hpc>=4.9.3",
     ],
     extras_require={
         "reporting": ["jinja2>=3.0", "matplotlib>=3.0", "plotly>=5.0"],

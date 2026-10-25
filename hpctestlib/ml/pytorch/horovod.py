@@ -67,8 +67,6 @@ class pytorch_cnn_check(rfm.RunOnlyRegressionTest, pin_prefix=True):
     #: :default: ``5``
     num_warmup_batches = variable(int, value=5)
 
-    valid_systems = ['*']
-    valid_prog_environs = ['*']
     executable = 'python pytorch_synthetic_benchmark.py'
     tags = {'ml', 'cnn', 'horovod'}
 
