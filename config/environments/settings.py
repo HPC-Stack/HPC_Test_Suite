@@ -9,8 +9,6 @@ site_configuration = {
             'cc':  'mpicc',
             'cxx': 'mpicxx',
             'ftn': 'mpif90',
-            'modules': ['openmpi/h34jdpb'],
-            'target_systems': ['paramrudra.cdacb'],
         },
         {
             'name': 'gnu',
@@ -24,15 +22,12 @@ site_configuration = {
             'cc':  'icc',
             'cxx': 'icpc',
             'ftn': 'ifort',
-            'modules': ['intel-oneapi-compilers/t7vsoln'],
         },
         {
             'name': 'nvhpc',
             'cc': 'nvc',
             'cxx': 'nvcc',
-            'ftn': 'nvfortran',
-            'modules': ['nvhpc/n62w34u'],
-            
+            'ftn': 'nvfortran',           
         }
     ],
 }

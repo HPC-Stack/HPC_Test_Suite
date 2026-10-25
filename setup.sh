@@ -12,6 +12,18 @@ else
     return 1 2>/dev/null || exit 1
 fi
 
+# Discover a Spack installation
+if ! command -v spack >/dev/null 2>&1; then
+    for _candidate in /home/*/spack /opt/spack /scratch/*/spack; do
+        if [ -x "$_candidate/bin/spack" ]; then
+            export SPACK_ROOT="$_candidate"
+            export PATH="$SPACK_ROOT/bin:$PATH"
+            break
+        fi
+    done
+fi
+
+
 SCRIPT_DIR="$(CDPATH= cd -- "$(dirname -- "$_this_file")" && pwd -P)"
 
 # Add project bin directory to PATH
